@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: api-tree-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ms_family_tree
+    username: postgres
+    password: KiDaaduu
+  devtools:
+    restart:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        default_schema: family
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+    defer-datasource-initialization: true
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: false
+server:
+  port: 8090
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: metrics, health
