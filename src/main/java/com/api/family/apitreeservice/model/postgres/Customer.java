@@ -2,6 +2,7 @@ package com.api.family.apitreeservice.model.postgres;
 
 import com.api.family.apitreeservice.constants.Constants;
 import com.api.family.apitreeservice.model.dto.user.UserDto;
+import com.api.family.apitreeservice.model.response.FileObject;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -62,6 +63,9 @@ public class Customer {
     @JsonManagedReference
     @JsonIgnore
     private Customer parent;
+
+    @OneToOne(cascade = CascadeType.MERGE)
+    private FileObject profilePicture;
 
     public Customer(@NotNull UserDto userDto, User user) {
         this.firstName = userDto.getFirstName();

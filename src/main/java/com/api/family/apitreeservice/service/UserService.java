@@ -10,7 +10,6 @@ import com.api.family.apitreeservice.model.postgres.Customer;
 import com.api.family.apitreeservice.model.postgres.User;
 import com.api.family.apitreeservice.repository.UserRepository;
 import com.api.family.apitreeservice.spec.UserSpecs;
-import com.api.family.apitreeservice.validator.JwtTokenGenerate;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,6 @@ public class UserService {
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
-    private final JwtTokenGenerate jwtTokenGenerate;
     private final UserSpecs userSpecs;
     private final UtilService utilService;
     private final CustomerService customerService;
@@ -76,10 +74,6 @@ public class UserService {
 
     public void profileUpdate(@Valid UserDto userDto) {
         customerService.updateProfileData(userDto);
-    }
-
-    public void nameUpdate(@Valid UserDto userDto) {
-        customerService.updateName(userDto);
     }
 
     public Page<User> getByPendingStatus(Pagination pagination) {

@@ -1,5 +1,6 @@
 package com.api.family.apitreeservice.model.dto.customer;
 
+import com.api.family.apitreeservice.model.dto.file.FileObjectDto;
 import com.api.family.apitreeservice.model.postgres.Customer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,4 +21,5 @@ public class ParentDto {
     private Customer husband;
     private Customer wife;
     private List<ParentDto> children;
+    private FileObjectDto profilePicture;
 }

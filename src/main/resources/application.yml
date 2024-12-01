@@ -21,6 +21,8 @@ spring:
     default-property-inclusion: non_null
     deserialization:
       fail-on-unknown-properties: false
+file:
+  uploadDir: ${API_FILE_UPLOAD_DIR}
 server:
   port: 8090
 management:
