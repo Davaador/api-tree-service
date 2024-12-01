@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration.AccessLevel;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -18,6 +19,9 @@ import reactor.netty.http.client.HttpClient;
 
 @Configuration
 @EnableJpaAuditing
+@EnableConfigurationProperties({
+        FileObjectProperties.class
+})
 public class ApplicationConfig {
 
     @Bean

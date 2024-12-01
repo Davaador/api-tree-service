@@ -37,4 +37,12 @@ public class CustomerController {
     public Dashboard dashboard() {
         return customerService.dashboard();
     }
+
+    @PostMapping("/update/info")
+    @ResponseStatus(HttpStatus.OK)
+    public CoupleDto updateInfo(@RequestBody CustomerDto customerDto) {
+        return customerService.updateInfo(customerDto);
+    }
+
+
 }
