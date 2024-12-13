@@ -1,5 +1,6 @@
 package com.api.family.apitreeservice.model.dto.customer;
 
+import com.api.family.apitreeservice.model.dto.file.FileObjectDto;
 import com.api.family.apitreeservice.model.dto.user.UserDto;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -23,5 +24,6 @@ public class CustomerDto {
     private boolean editCustomer = false;
     private LocalDateTime modifiedDate = LocalDateTime.now();
     private UserDto user;
+    private FileObjectDto profilePicture;
 
 }
