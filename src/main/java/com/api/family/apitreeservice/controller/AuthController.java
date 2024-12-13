@@ -2,9 +2,7 @@ package com.api.family.apitreeservice.controller;
 
 import com.api.family.apitreeservice.model.dto.auth.Credentials;
 import com.api.family.apitreeservice.model.dto.customer.CoupleDto;
-import com.api.family.apitreeservice.model.dto.customer.CustomerDto;
 import com.api.family.apitreeservice.model.dto.user.UserDto;
-import com.api.family.apitreeservice.model.dto.user.UserDtoDetail;
 import com.api.family.apitreeservice.model.response.Token;
 import com.api.family.apitreeservice.service.AuthService;
 import com.api.family.apitreeservice.service.UserService;
@@ -53,9 +51,4 @@ public class AuthController {
         userService.profileUpdate(userDto);
     }
 
-    @PostMapping("/user/profile/update/name")
-    @ResponseStatus(HttpStatus.OK)
-    public void profileUpdateName(@RequestBody UserDto userDto){
-        userService.nameUpdate(userDto);
-    }
 }

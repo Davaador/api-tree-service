@@ -4,7 +4,8 @@ import org.springframework.http.HttpStatus;
 
 public class Errors {
 
-    private Errors(){}
+    private Errors() {
+    }
 
     public static final CustomError INTERNAL_ERROR = new CustomError(HttpStatus.INTERNAL_SERVER_ERROR, "TI001",
             "Internal server error.");
@@ -34,5 +35,17 @@ public class Errors {
             "Админ эрхээр зөвшөөрнө үү..");
     public static final CustomError ACTIVE_WIFE = new CustomError(HttpStatus.BAD_REQUEST, "NOT_ADMIN",
             "Бүртгүүлсэн гишүүн байна. Та мэдээллээ шалгана уу?");
+    public static final CustomError FILE_OBJECT_NOT_FOUND = new CustomError(HttpStatus.NOT_FOUND,
+            "TI115",
+            "The file object is not found.");
+    public static final CustomError FAILED_DELETING_FILE = new CustomError(HttpStatus.INTERNAL_SERVER_ERROR,
+            "TI113",
+            "Failed deleting the file.");
+    public static final CustomError UNKNOWN_FILE_TYPE = new CustomError(HttpStatus.BAD_REQUEST,
+            "TI114",
+            "Unknown file type.");
+    public static final CustomError FAILED_CONVERTING_FILE_TO_BYTE = new CustomError(HttpStatus.INTERNAL_SERVER_ERROR,
+            "TI138",
+            "Failed converting a file to byte array.");
 
 }

@@ -22,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -31,6 +32,7 @@ public class CustomerService {
     private final JwtTokenGenerate jwtTokenGenerate;
     private final ModelMapper modelMapper;
     private final UtilService utilService;
+    private final FileObjectService fileObjectService;
 
     public Customer create(UserDto userDto, User user) {
         Customer customer = new Customer(userDto, user);
@@ -41,13 +43,28 @@ public class CustomerService {
         return customerRepository.findByRegister(register).isPresent();
     }
 
-    public void updateName(@NotNull UserDto userDto) {
+    public CoupleDto updateInfo(@NotNull CustomerDto customerDto) {
         Customer customer = utilService.findByCustomer();
-        customer.setSurName(userDto.getSurName());
-        customer.setFirstName(userDto.getFirstName());
-        customer.setLastName(userDto.getLastName());
+        customer.setSurName(customerDto.getSurName());
+        customer.setFirstName(customerDto.getFirstName());
+        customer.setLastName(customerDto.getLastName());
         customer.setModifiedDate(LocalDateTime.now());
-        customerRepository.save(customer);
+        Long imageId = null;
+        if (Objects.nonNull(customerDto.getProfilePicture())) {
+            var image = fileObjectService.getDaoById(customerDto.getProfilePicture().getId());
+            if (Objects.nonNull(customer.getProfilePicture())) {
+                imageId = customer.getProfilePicture().getId();
+                if (!image.getId().equals(imageId)) {
+                    customer.setProfilePicture(image);
+                }
+            } else {
+                customer.setProfilePicture(image);
+            }
+        }
+        var saveCustomer = customerRepository.save(customer);
+        if (imageId != null)
+            fileObjectService.deleteById(imageId);
+        return modelMapper.map(saveCustomer, CoupleDto.class);
     }
 
     public void updateProfileData(@NotNull UserDto userDto) {
