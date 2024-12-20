@@ -4,13 +4,12 @@ import com.api.family.apitreeservice.model.postgres.Customer;
 import com.api.family.apitreeservice.model.postgres.User;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface CustomerRepository extends JpaRepository<Customer, Long> {
+public interface CustomerRepository extends JpaRepository<Customer, Long>, JpaSpecificationExecutor<Customer> {
     Optional<Customer> findByRegister(String register);
 
     Optional<Customer> findByUser(User user);
