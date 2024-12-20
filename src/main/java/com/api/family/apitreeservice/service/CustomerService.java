@@ -6,16 +6,25 @@ import com.api.family.apitreeservice.exception.Errors;
 import com.api.family.apitreeservice.model.dto.customer.CoupleDto;
 import com.api.family.apitreeservice.model.dto.customer.CustomerCoupleDto;
 import com.api.family.apitreeservice.model.dto.customer.CustomerDto;
+import com.api.family.apitreeservice.model.dto.customer.CustomerFilter;
 import com.api.family.apitreeservice.model.dto.user.UserDto;
 import com.api.family.apitreeservice.model.postgres.Customer;
 import com.api.family.apitreeservice.model.postgres.User;
 import com.api.family.apitreeservice.model.response.Dashboard;
 import com.api.family.apitreeservice.repository.CustomerRepository;
+import com.api.family.apitreeservice.spec.CustomerSpecs;
 import com.api.family.apitreeservice.validator.JwtTokenGenerate;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -33,6 +42,7 @@ public class CustomerService {
     private final ModelMapper modelMapper;
     private final UtilService utilService;
     private final FileObjectService fileObjectService;
+    private final CustomerSpecs customerSpecs;
 
     public Customer create(UserDto userDto, User user) {
         Customer customer = new Customer(userDto, user);
@@ -135,5 +145,18 @@ public class CustomerService {
         dashboard.setPendingCount((int) (customers.size() - active));
         dashboard.setActiveCount((int) active);
         return dashboard;
+    }
+
+    public Page<CoupleDto> findByActiveAllCustomers(@Valid CustomerFilter filter) {
+        Specification<Customer> spec = Specification.where(null);
+        if (StringUtils.isNotBlank(filter.getPhoneNumber())) {
+            spec = spec.and(customerSpecs.customerContainsEnabled(filter.getPhoneNumber()));
+        }
+        Sort.Direction direction = filter.getIsSortAscending() == 1 ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, "age");
+        Pageable pageable = PageRequest.of(filter.getPage(), filter.getSize(), sort);
+        var list = customerRepository.findAll(spec, pageable);
+        return list.map(x -> modelMapper.map(x, CoupleDto.class));
+
     }
 }

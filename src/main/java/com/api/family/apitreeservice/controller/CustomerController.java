@@ -3,9 +3,11 @@ package com.api.family.apitreeservice.controller;
 import com.api.family.apitreeservice.model.dto.customer.CoupleDto;
 import com.api.family.apitreeservice.model.dto.customer.CustomerCoupleDto;
 import com.api.family.apitreeservice.model.dto.customer.CustomerDto;
+import com.api.family.apitreeservice.model.dto.customer.CustomerFilter;
 import com.api.family.apitreeservice.model.response.Dashboard;
 import com.api.family.apitreeservice.service.CustomerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,6 +44,11 @@ public class CustomerController {
     @ResponseStatus(HttpStatus.OK)
     public CoupleDto updateInfo(@RequestBody CustomerDto customerDto) {
         return customerService.updateInfo(customerDto);
+    }
+
+    @GetMapping("/active/all")
+    public Page<CoupleDto> getActiveCustomer(CustomerFilter customerFilter) {
+        return customerService.findByActiveAllCustomers(customerFilter);
     }
 
 
