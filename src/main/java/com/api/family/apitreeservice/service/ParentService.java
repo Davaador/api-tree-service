@@ -10,13 +10,14 @@ import com.api.family.apitreeservice.model.postgres.Customer;
 import com.api.family.apitreeservice.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -33,7 +34,7 @@ public class ParentService {
         return customers.stream().filter(c -> c.getUser().isEnabled()).map(x -> modelMapper.map(x, CoupleDto.class)).toList();
     }
 
-    public CoupleDto addParent(AddParentDto addParentDto) {
+    public CoupleDto addParent(@NotNull AddParentDto addParentDto) {
         log.info("addParent started: ");
         Customer customer = utilService.findByCustomer();
         Customer parentCustomer = customerRepository.findById(addParentDto.getParentId().longValue()).orElseThrow(() -> new CustomException(Errors.NOT_PENDING_USERS));
@@ -62,28 +63,37 @@ public class ParentService {
 
     public ParentDto findParentsByParentId(List<Integer> id) {
         log.info("findParentsByParentId started for ID: {}", id);
-        List<ParentDto> parentList;
-        ParentDto parentDto = null;
         List<Customer> fatherCustomers = customerRepository.findByParentAndIsParent(null, 0);
-        if (!CollectionUtils.isEmpty(fatherCustomers)) {
-            parentDto = modelMapper.map(fatherCustomers.getFirst(), ParentDto.class);
+        ParentDto parentDto = modelMapper.map(fatherCustomers.getFirst(), ParentDto.class);
+        List<ParentDto> lastParentList;
+        Map<Integer, List<ParentDto>> maps = new HashMap<>();
+        for (Integer i : id) {
+            Optional<Customer> firstCustomer = customerRepository.findById(i);
+            if (firstCustomer.isPresent()) {
+                List<Customer> childList = customerRepository.findByParentAndIsParent(firstCustomer.get(), 0);
+                maps.put(i, childList.stream().map(x -> modelMapper.map(x, ParentDto.class)).toList());
+            }
         }
 
-        for (Integer i : id) {
-            if (Objects.nonNull(parentDto)) {
-                Optional<Customer> firstCustomer = customerRepository.findById(i);
-                if (firstCustomer.isPresent()) {
-                    List<Customer> childList = customerRepository.findByParentAndIsParent(firstCustomer.get(), 0);
-                    if (CollectionUtils.isEmpty(parentDto.getChildren())) {
-                        parentList = childList.stream().map(x -> modelMapper.map(x, ParentDto.class)).toList();
-                        parentDto.setChildren(parentList);
-                    } else {
-                        Optional<ParentDto> parentDto1 = parentDto.getChildren().stream().filter(x -> x.getId().equals(i)).findFirst();
-                        parentDto1.ifPresent(dto -> dto.setChildren(childList.stream().map(x -> modelMapper.map(x, ParentDto.class)).toList()));
-                    }
-
+        if (!maps.isEmpty()) {
+            for (int i = id.size() - 1; i >= 0; i--) {
+                if (id.size() - 1 == i) {
+                    lastParentList = maps.get(id.get(i));
+                } else {
+                    int finalI = i + 1;
+                    lastParentList = maps.get(id.get(i)).stream().map(x -> {
+                        if(x.getId().equals(id.get(finalI))) {
+                            x.setChildren(maps.get(id.get(finalI)));
+                        }
+                        return x;
+                    }).toList();
                 }
+                if (fatherCustomers.getFirst().getId().equals(id.get(i))) {
+                    parentDto.setChildren(lastParentList);
+                }
+
             }
+
         }
         return parentDto;
     }

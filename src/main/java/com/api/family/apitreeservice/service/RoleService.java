@@ -15,6 +15,6 @@ public class RoleService {
     private final RoleRepository roleRepository;
 
     public Role getRoleByName(@NotBlank String name) {
-        return roleRepository.findByName(name).orElseThrow(()->new CustomException(Errors.ROLE_NOT_FOUND));
+        return roleRepository.findByName(name).orElseThrow(() -> new CustomException(Errors.ROLE_NOT_FOUND));
     }
 }

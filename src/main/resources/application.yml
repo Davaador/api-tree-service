@@ -2,9 +2,10 @@ spring:
   application:
     name: api-tree-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/ms_family_tree
-    username: postgres
-    password: KiDaaduu
+    url: jdbc:postgresql://51.20.251.210:5432/ms_family_tree
+    username: daaduu
+    password: KiDavaa08
+    driver-class-name: org.postgresql.Driver
   devtools:
     restart:
       enabled: true
@@ -18,13 +19,13 @@ spring:
     open-in-view: false
     defer-datasource-initialization: true
   jackson:
-    default-property-inclusion: non_null
+    default-property-inclusion: non-null
     deserialization:
       fail-on-unknown-properties: false
 file:
   uploadDir: ${API_FILE_UPLOAD_DIR}
 server:
-  port: 8090
+  port: 8083
 management:
   endpoints:
     web:

@@ -6,7 +6,8 @@ import lombok.Getter;
 public enum RoleEnumString {
     ROLE_ADMIN("ADMIN"),
     ROLE_CUSTOMER("CUSTOMER"),
-    ROLE_ROOT("ROOT");
+    ROLE_ROOT("ROOT"),
+    CHILD("CHILD");
 
 
     private final String value;

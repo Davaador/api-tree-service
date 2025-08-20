@@ -47,5 +47,9 @@ public class Errors {
     public static final CustomError FAILED_CONVERTING_FILE_TO_BYTE = new CustomError(HttpStatus.INTERNAL_SERVER_ERROR,
             "TI138",
             "Failed converting a file to byte array.");
+    public static final CustomError NOT_HUSBAND = new CustomError(HttpStatus.BAD_REQUEST, "API0012",
+            "Гэр бүлийн гишүүнээ сонгоно уу.");
+    public static final CustomError NOT_CHILD = new CustomError(HttpStatus.BAD_REQUEST, "API0013",
+            "Таньд бүртгүүлсэн хүүхдийн мэдээлэл байхгүй байна.");
 
 }

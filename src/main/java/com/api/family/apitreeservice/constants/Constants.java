@@ -13,7 +13,7 @@ public class Constants {
     public static final Integer GREATER_AGE = 18;
     public static final String MEN_GENDER = "0";
     public static final String WOMEN_GENDER = "1";
-
-
-
+    public static final String CHILD_PASSWORD = "Three123";
+    public static final String CHILD_PHONE = "13131313";
+    public static final String FILTER_FORMAT = "%%%s%%";
 }

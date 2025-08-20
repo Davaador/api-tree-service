@@ -3,6 +3,7 @@ package com.api.family.apitreeservice.service;
 import com.api.family.apitreeservice.constants.Constants;
 import com.api.family.apitreeservice.exception.CustomException;
 import com.api.family.apitreeservice.exception.Errors;
+import com.api.family.apitreeservice.model.dto.child.ChildDto;
 import com.api.family.apitreeservice.model.dto.customer.CoupleDto;
 import com.api.family.apitreeservice.model.dto.customer.CustomerCoupleDto;
 import com.api.family.apitreeservice.model.dto.customer.CustomerDto;
@@ -17,7 +18,6 @@ import com.api.family.apitreeservice.validator.JwtTokenGenerate;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -46,6 +46,12 @@ public class CustomerService {
 
     public Customer create(UserDto userDto, User user) {
         Customer customer = new Customer(userDto, user);
+        return customerRepository.save(customer);
+    }
+
+    public Customer createChild(ChildDto childDto, User user, Customer parentCustomer) {
+        Customer customer = new Customer(childDto, user);
+        customer.setParent(parentCustomer);
         return customerRepository.save(customer);
     }
 
@@ -149,11 +155,14 @@ public class CustomerService {
 
     public Page<CoupleDto> findByActiveAllCustomers(@Valid CustomerFilter filter) {
         Specification<Customer> spec = Specification.where(null);
-        if (StringUtils.isNotBlank(filter.getPhoneNumber())) {
-            spec = spec.and(customerSpecs.customerContainsEnabled(filter.getPhoneNumber()));
-        }
+//        if (StringUtils.isNotBlank(filter.getPhoneNumber())) {
+//            spec = spec.and(customerSpecs.customerContainsEnabled(filter.getPhoneNumber(), ""));
+//        }
+//        if(StringUtils.isNotBlank(filter.getLastName())) {
+        spec = spec.and(customerSpecs.customerContainsEnabled(filter.getPhoneNumber(), filter.getLastName(), filter.getFirstName()));
+//        }
         Sort.Direction direction = filter.getIsSortAscending() == 1 ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Sort sort = Sort.by(direction, "age");
+        Sort sort = Sort.by(direction, "birthDate");
         Pageable pageable = PageRequest.of(filter.getPage(), filter.getSize(), sort);
         var list = customerRepository.findAll(spec, pageable);
         return list.map(x -> modelMapper.map(x, CoupleDto.class));

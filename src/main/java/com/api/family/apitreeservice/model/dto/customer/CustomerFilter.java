@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CustomerFilter extends Pagination {
     private String phoneNumber;
+    private String lastName;
+    private String firstName;
     @NotNull
     private int isSortAscending;
 }
