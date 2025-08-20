@@ -1,14 +1,14 @@
 # Java 21 суурьтай image ашиглах
-FROM eclipse-temurin:21-jdk-jammy
+FROM eclipse-temurin:21-jdk-alpine
+# JVM тохиргоо: RAM багасгах
+ENV JAVA_OPTS="-Xmx512m -Xms256m"
 
-# Working directory
 WORKDIR /app
 
-# Build хийсэн JAR файлаа хуулна
+# JAR файлаа хуулна
 COPY target/*.jar app.jar
 
-# Expose Spring Boot-ын порт
 EXPOSE 8080
 
-# App-г асаах
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Апп эхлүүлэхэд JVM тохиргоо хэрэглэнэ
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
