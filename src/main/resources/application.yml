@@ -2,16 +2,16 @@ spring:
   application:
     name: api-tree-service
   datasource:
-    url: jdbc:postgresql://51.20.251.210:5432/ms_family_tree
-    username: daaduu
-    password: KiDavaa08
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   devtools:
     restart:
       enabled: true
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
     properties:
       hibernate:
         default_schema: family
@@ -25,7 +25,7 @@ spring:
 file:
   uploadDir: ${API_FILE_UPLOAD_DIR}
 server:
-  port: 8083
+  port: 8080
 management:
   endpoints:
     web:
