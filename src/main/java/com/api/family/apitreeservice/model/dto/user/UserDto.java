@@ -26,5 +26,6 @@ public class UserDto {
     private String register;
     private Date birthDate;
     private Integer age;
+    private Integer isParent;
     private List<Role> roles;
 }

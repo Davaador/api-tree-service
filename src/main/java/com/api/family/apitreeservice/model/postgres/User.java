@@ -1,5 +1,6 @@
 package com.api.family.apitreeservice.model.postgres;
 
+import com.api.family.apitreeservice.model.dto.child.ChildDto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -13,7 +14,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 @Data
@@ -38,10 +38,10 @@ public class User implements UserDetails {
 
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "user_role", joinColumns = {
-            @JoinColumn(name = "user_id", referencedColumnName = "id") }, inverseJoinColumns = {
+            @JoinColumn(name = "user_id", referencedColumnName = "id")}, inverseJoinColumns = {
             @JoinColumn(name = "role_id", referencedColumnName = "id")
     })
-    private List<Role> roles= new ArrayList<>();
+    private List<Role> roles = new ArrayList<>();
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
@@ -56,16 +56,27 @@ public class User implements UserDetails {
     public String getUsername() {
         return this.phoneNumber;
     }
+
     public void addRole(Role role) {
         roles.add(role);
     }
 
-    public User( String password, String phoneNumber, boolean enabled) {
+    public User(String password, String phoneNumber, boolean enabled) {
         this.password = password;
         this.phoneNumber = phoneNumber;
         this.accountNonExpired = true;
         this.accountNonLocked = true;
         this.credentialsNonExpired = true;
         this.enabled = enabled;
+    }
+
+    public User(String password, String phoneNumber) {
+        this.enabled = true;
+        this.accountNonExpired = true;
+        this.accountNonLocked = true;
+        this.credentialsNonExpired = true;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
+
     }
 }

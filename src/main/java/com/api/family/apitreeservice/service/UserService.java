@@ -5,6 +5,7 @@ import com.api.family.apitreeservice.constants.RoleEnumString;
 import com.api.family.apitreeservice.exception.CustomException;
 import com.api.family.apitreeservice.exception.Errors;
 import com.api.family.apitreeservice.model.dto.Pagination;
+import com.api.family.apitreeservice.model.dto.customer.CustomerDto;
 import com.api.family.apitreeservice.model.dto.user.UserDto;
 import com.api.family.apitreeservice.model.postgres.Customer;
 import com.api.family.apitreeservice.model.postgres.User;
@@ -43,6 +44,7 @@ public class UserService {
         user.addRole(role);
         if (role.getName().equals(RoleEnumString.ROLE_ROOT.getValue())) {
             user.setEnabled(Boolean.TRUE);
+            userDto.setIsParent(0);
         }
         Customer customer = customerService.create(userDto, user);
         var mappedAdminDto = modelMapper.map(customer.getUser(), UserDto.class);
@@ -99,4 +101,5 @@ public class UserService {
     public User getById(@NotNull Long id) {
         return userRepository.findById(id).orElseThrow(() -> new CustomException(Errors.NOT_PENDING_USERS));
     }
+
 }

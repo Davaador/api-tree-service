@@ -1,8 +1,10 @@
 package com.api.family.apitreeservice.model.postgres;
 
 import com.api.family.apitreeservice.constants.Constants;
+import com.api.family.apitreeservice.model.dto.child.ChildDto;
 import com.api.family.apitreeservice.model.dto.user.UserDto;
 import com.api.family.apitreeservice.model.response.FileObject;
+import com.api.family.apitreeservice.validator.Functions;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -72,13 +74,28 @@ public class Customer {
         this.lastName = userDto.getLastName();
         this.register = userDto.getRegister();
         this.surName = userDto.getSurName();
-        this.birthDate = userDto.getBirthDate();
+        this.birthDate = Functions.getBirthday(userDto.getRegister());
         this.age = userDto.getAge();
         this.phoneNumber = userDto.getPhoneNumber();
         this.user = user;
         this.gender = Integer.parseInt(String.valueOf(userDto.getRegister()
                 .charAt(userDto.getRegister().length() - 2))) % 2 == 0
                 ? Constants.WOMEN_GENDER : Constants.MEN_GENDER;
+        this.isParent = userDto.getIsParent();
+    }
+
+    public Customer(@NotNull ChildDto childDto, User user) {
+        this.firstName = childDto.getFirstName();
+        this.lastName = childDto.getLastName();
+        this.register = childDto.getRegister();
+        this.surName = childDto.getSurName();
+        this.user = user;
+        this.gender = Functions.getGender(childDto.getRegister());
+        this.age = Functions.getAge(childDto.getRegister());
+        this.isParent = 0;
+        this.phoneNumber = Constants.CHILD_PHONE;
+        this.editCustomer = Boolean.TRUE;
+        this.birthDate = Functions.getBirthday(childDto.getRegister());
     }
 
 }
