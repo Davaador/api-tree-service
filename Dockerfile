@@ -5,6 +5,9 @@ ENV JAVA_OPTS="-Xmx512m -Xms256m"
 
 WORKDIR /app
 
+ENV API_FILE_UPLOAD_DIR=/uploads
+RUN mkdir -p ${API_FILE_UPLOAD_DIR}
+
 # JAR файлаа хуулна
 COPY target/*.jar app.jar
 

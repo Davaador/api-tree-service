@@ -37,7 +37,7 @@ spring:
           starttls:
             enable: true
 file:
-  uploadDir: ${API_FILE_UPLOAD_DIR}
+  uploadDir: ${API_FILE_UPLOAD_DIR:./uploads}
 server:
   port: 8080
 management:
