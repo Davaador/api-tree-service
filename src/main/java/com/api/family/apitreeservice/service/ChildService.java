@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -72,7 +73,7 @@ public class ChildService {
 
         List<Customer> childLists = customerRepository.findByParentAndIsParent(customer, 0);
         if (CollectionUtils.isEmpty(childLists))
-            throw new CustomException(Errors.NOT_CHILD);
+            return new ArrayList<>();
         log.info("Get info child lists finished");
 
         return childLists.stream().map(child -> modelMapper.map(child, ParentDto.class))
