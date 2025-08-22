@@ -39,6 +39,7 @@ public class Customer {
     private Integer age;
     private String gender;
     private String phoneNumber;
+    @Column(unique = true, name = "email", nullable = true)
     private String email;
     private boolean editCustomer = false;
     private LocalDateTime modifiedDate = LocalDateTime.now();
