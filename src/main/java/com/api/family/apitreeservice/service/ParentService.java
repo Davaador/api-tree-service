@@ -31,18 +31,21 @@ public class ParentService {
     public List<CoupleDto> findAllParents() {
         log.info("findAllParents started: ");
         List<Customer> customers = customerRepository.findByAgeGreaterThanEqual(Constants.GREATER_AGE);
-        return customers.stream().filter(c -> c.getUser().isEnabled()).map(x -> modelMapper.map(x, CoupleDto.class)).toList();
+        return customers.stream().filter(c -> c.getUser().isEnabled()).map(x -> modelMapper.map(x, CoupleDto.class))
+                .toList();
     }
 
     public CoupleDto addParent(@NotNull AddParentDto addParentDto) {
         log.info("addParent started: ");
         Customer customer = utilService.findByCustomer();
-        Customer parentCustomer = customerRepository.findById(addParentDto.getParentId().longValue()).orElseThrow(() -> new CustomException(Errors.NOT_PENDING_USERS));
+        Customer parentCustomer = customerRepository.findById(addParentDto.getParentId().longValue())
+                .orElseThrow(() -> new CustomException(Errors.NOT_PENDING_USERS));
         customer.setParent(parentCustomer);
         customer.setIsParent(addParentDto.getIsParent());
         customer.setSurName(addParentDto.getSurName());
         customer.setBirthDate(addParentDto.getBirthDate());
         customer.setAge(addParentDto.getAge());
+        utilService.checkIfCustomerInEmail(addParentDto.getEmail(), Boolean.FALSE, Errors.NOT_CUSTOMER_EMAIL);
         customer.setEmail(addParentDto.getEmail());
         customer.setModifiedDate(LocalDateTime.now());
         customer.setEditCustomer(Boolean.TRUE);
@@ -56,7 +59,8 @@ public class ParentService {
         List<Customer> customers = customerRepository.findByParent(null);
         Optional<Customer> parent = customers.stream().filter(c -> c.getUser().isEnabled()
                 && c.getIsParent() == 0).findFirst();
-        if (parent.isPresent()) parentDto = modelMapper.map(parent.get(), ParentDto.class);
+        if (parent.isPresent())
+            parentDto = modelMapper.map(parent.get(), ParentDto.class);
 
         return parentDto;
     }
@@ -82,7 +86,7 @@ public class ParentService {
                 } else {
                     int finalI = i + 1;
                     lastParentList = maps.get(id.get(i)).stream().map(x -> {
-                        if(x.getId().equals(id.get(finalI))) {
+                        if (x.getId().equals(id.get(finalI))) {
                             x.setChildren(maps.get(id.get(finalI)));
                         }
                         return x;

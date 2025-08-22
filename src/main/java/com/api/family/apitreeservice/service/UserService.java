@@ -45,6 +45,9 @@ public class UserService {
         if (role.getName().equals(RoleEnumString.ROLE_ROOT.getValue())) {
             user.setEnabled(Boolean.TRUE);
             userDto.setIsParent(0);
+            userDto.setAge(19);
+        } else if (RoleEnumString.ROLE_ADMIN.getValue().equals(role.getName())) {
+            user.setEnabled(Boolean.TRUE);
         }
         Customer customer = customerService.create(userDto, user);
         var mappedAdminDto = modelMapper.map(customer.getUser(), UserDto.class);
