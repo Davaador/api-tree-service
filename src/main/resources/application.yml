@@ -3,8 +3,11 @@ spring:
     name: api-tree-service
   datasource:
     url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    # username: ${SPRING_DATASOURCE_USERNAME}
+    # password: ${SPRING_DATASOURCE_PASSWORD}
+    # url: jdbc:postgresql://localhost:5433/ms_family_tree
+    username: ${SPRING_DATASOURCE_USERNAME:daaduu}
+    password: ${SPRING_DATASOURCE_PASSWORD:KiDavaa08}
     driver-class-name: org.postgresql.Driver
   devtools:
     restart:
@@ -22,6 +25,17 @@ spring:
     default-property-inclusion: non-null
     deserialization:
       fail-on-unknown-properties: false
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: davaatest@gmail.com
+    password: jrlg ntvt qvnv klop
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 file:
   uploadDir: ${API_FILE_UPLOAD_DIR}
 server:

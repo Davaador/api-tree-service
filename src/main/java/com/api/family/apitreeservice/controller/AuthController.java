@@ -2,9 +2,11 @@ package com.api.family.apitreeservice.controller;
 
 import com.api.family.apitreeservice.model.dto.auth.Credentials;
 import com.api.family.apitreeservice.model.dto.customer.CoupleDto;
+import com.api.family.apitreeservice.model.dto.user.ResetPasswordDto;
 import com.api.family.apitreeservice.model.dto.user.UserDto;
 import com.api.family.apitreeservice.model.response.Token;
 import com.api.family.apitreeservice.service.AuthService;
+import com.api.family.apitreeservice.service.ResetPasswordService;
 import com.api.family.apitreeservice.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/auth")
@@ -20,9 +24,10 @@ public class AuthController {
 
     private final UserService userService;
     private final AuthService authService;
+    private final ResetPasswordService resetPasswordService;
 
     @PostMapping("/token")
-    public Token token(@RequestBody Credentials credentials, HttpServletResponse response){
+    public Token token(@RequestBody Credentials credentials, HttpServletResponse response) {
 
         var token = authService.authenticate(credentials);
         var cookie = ResponseCookie.from("accessToken", token.getToken())
@@ -36,19 +41,34 @@ public class AuthController {
 
     @PostMapping("/user/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto register(@RequestBody UserDto userDto){
+    public UserDto register(@RequestBody UserDto userDto) {
         return userService.create(userDto);
     }
 
     @GetMapping("/introspect")
-    public CoupleDto introspect(){
+    public CoupleDto introspect() {
         return authService.getUserDetails();
     }
 
     @PostMapping("/user/profile/update")
     @ResponseStatus(HttpStatus.OK)
-    public void profileUpdate(@RequestBody UserDto userDto){
+    public void profileUpdate(@RequestBody UserDto userDto) {
         userService.profileUpdate(userDto);
+    }
+
+    @PostMapping("/sent/otp")
+    public void sendOtp(@RequestBody ResetPasswordDto resetPasswordDto) {
+        resetPasswordService.sendToOtp(resetPasswordDto);
+    }
+
+    @PostMapping("/check/otp")
+    public String checkOtp(@RequestBody ResetPasswordDto resetPasswordDto) {
+        return resetPasswordService.checkCustomerOtp(resetPasswordDto);
+    }
+
+    @PostMapping("/reset/password")
+    public void resetPassword(@RequestBody ResetPasswordDto resetPasswordDto) {
+        resetPasswordService.resetPassword(resetPasswordDto);
     }
 
 }

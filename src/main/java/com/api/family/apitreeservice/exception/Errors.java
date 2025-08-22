@@ -44,12 +44,25 @@ public class Errors {
     public static final CustomError UNKNOWN_FILE_TYPE = new CustomError(HttpStatus.BAD_REQUEST,
             "TI114",
             "Unknown file type.");
-    public static final CustomError FAILED_CONVERTING_FILE_TO_BYTE = new CustomError(HttpStatus.INTERNAL_SERVER_ERROR,
+    public static final CustomError FAILED_CONVERTING_FILE_TO_BYTE = new CustomError(
+            HttpStatus.INTERNAL_SERVER_ERROR,
             "TI138",
             "Failed converting a file to byte array.");
     public static final CustomError NOT_HUSBAND = new CustomError(HttpStatus.BAD_REQUEST, "API0012",
             "Гэр бүлийн гишүүнээ сонгоно уу.");
     public static final CustomError NOT_CHILD = new CustomError(HttpStatus.BAD_REQUEST, "API0013",
             "Таньд бүртгүүлсэн хүүхдийн мэдээлэл байхгүй байна.");
+    public static final CustomError NOT_EMAIL = new CustomError(HttpStatus.BAD_REQUEST, "API0013",
+            "Тухайн майл дээр бүртгүүлсэн харилцагч байхгүй байна.");
+    public static final CustomError NOT_CUSTOMER_OTP = new CustomError(HttpStatus.BAD_REQUEST, "API0013",
+            "Таньд нэг удаагийн код үүсээгүй байна.");
+    public static final CustomError NOT_CUSTOMER_OTP_EXPIRY = new CustomError(HttpStatus.BAD_REQUEST, "API0013",
+            "Таны нэг удаагийн кодны хугацаа дууссан байна.");
+    public static final CustomError NOT_CUSTOMER_OTP_EQUALS = new CustomError(HttpStatus.BAD_REQUEST, "API0013",
+            "Таны нэг удаагийн код буруу байна.");
+    public static final CustomError NOT_CUSTOMER_OTP_COUNT = new CustomError(HttpStatus.BAD_REQUEST, "API0013",
+            "Таны нэг удаагийн кодоо 3 удаа буруу оруулсан байна.");
+    public static final CustomError NOT_CUSTOMER_RESET_TOKEN = new CustomError(HttpStatus.BAD_REQUEST, "API0013",
+            "Таны мэдээлэл таарсангүй.");
 
 }

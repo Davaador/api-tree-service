@@ -9,13 +9,10 @@ public enum RoleEnumString {
     ROLE_ROOT("ROOT"),
     CHILD("CHILD");
 
-
     private final String value;
 
     RoleEnumString(String value) {
         this.value = value;
     }
-
-
 
 }

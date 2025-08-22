@@ -47,12 +47,16 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.cors(cors->cors.configurationSource(corsConfigurationSource())).authorizeHttpRequests(
+        return http.cors(cors -> cors.configurationSource(corsConfigurationSource())).authorizeHttpRequests(
                 requests -> requests.requestMatchers(HttpMethod.OPTIONS).permitAll()
                         .requestMatchers("/health/**", "/metrics", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/auth/token", "/auth/user/register").permitAll().anyRequest().authenticated()
-        ).csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .requestMatchers("/auth/token", "/auth/user/register", "/auth/sent/otp", "/auth/check/otp",
+                                "/auth/reset/password")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
