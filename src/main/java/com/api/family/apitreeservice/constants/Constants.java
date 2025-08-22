@@ -16,4 +16,6 @@ public class Constants {
     public static final String CHILD_PASSWORD = "Three123";
     public static final String CHILD_PHONE = "13131313";
     public static final String FILTER_FORMAT = "%%%s%%";
+    public static final String EMAIL_SUBJECT = "Нэг удаагийн нууц үг";
+    public static final String EMAIL_BODY = "Таны нэг удаагийн нууц үг:";
 }

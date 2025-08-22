@@ -1,6 +1,9 @@
 package com.api.family.apitreeservice.validator;
 
 import com.api.family.apitreeservice.constants.Constants;
+import com.api.family.apitreeservice.exception.CustomException;
+import com.api.family.apitreeservice.exception.Errors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,7 +19,8 @@ public class Functions {
     public static String getGender(String registerNo) {
         if (StringUtils.isNotBlank(registerNo)) {
             return Integer.parseInt(String.valueOf(registerNo.charAt(registerNo.length() - 2))) % 2 == 0
-                    ? Constants.WOMEN_GENDER : Constants.MEN_GENDER;
+                    ? Constants.WOMEN_GENDER
+                    : Constants.MEN_GENDER;
         }
         return Constants.MEN_GENDER;
     }
@@ -76,6 +80,11 @@ public class Functions {
         calendarInstance.set(Calendar.MONTH, month - 1);
         calendarInstance.set(Calendar.DAY_OF_MONTH, day);
         return calendarInstance.getTime();
+    }
+
+    public static void matchPasswords(String password, String matchingPassword) {
+        if (!matchingPassword.equals(password))
+            throw new CustomException(Errors.NOT_MATCH_PASSWORD);
     }
 
 }

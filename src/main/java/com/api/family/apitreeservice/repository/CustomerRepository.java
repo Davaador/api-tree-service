@@ -19,10 +19,18 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, JpaSp
     Optional<Customer> findByWife(Customer wife);
 
     Optional<Customer> findByHusband(Customer husband);
+
     List<Customer> findByAgeGreaterThanEqual(Integer age);
+
     List<Customer> findByParent(Customer parent);
+
     List<Customer> findByParentAndIsParent(Customer parent, Integer isParent);
+
     Optional<Customer> findById(int id);
-    @NotNull List<Customer> findAll();
+
+    @NotNull
+    List<Customer> findAll();
+
+    Optional<Customer> findByEmail(String email);
 
 }

@@ -23,7 +23,7 @@ import java.util.Date;
 @NoArgsConstructor
 @SoftDelete
 @Entity
-@Table(name = "customer", indexes = {@Index(name = "fn_customer_register", columnList = "register")})
+@Table(name = "customer", indexes = { @Index(name = "fn_customer_register", columnList = "register") })
 public class Customer {
 
     @Setter(AccessLevel.NONE)
@@ -68,6 +68,7 @@ public class Customer {
 
     @OneToOne(cascade = CascadeType.MERGE)
     private FileObject profilePicture;
+    private String resetToken;
 
     public Customer(@NotNull UserDto userDto, User user) {
         this.firstName = userDto.getFirstName();
@@ -80,7 +81,8 @@ public class Customer {
         this.user = user;
         this.gender = Integer.parseInt(String.valueOf(userDto.getRegister()
                 .charAt(userDto.getRegister().length() - 2))) % 2 == 0
-                ? Constants.WOMEN_GENDER : Constants.MEN_GENDER;
+                        ? Constants.WOMEN_GENDER
+                        : Constants.MEN_GENDER;
         this.isParent = userDto.getIsParent();
     }
 
