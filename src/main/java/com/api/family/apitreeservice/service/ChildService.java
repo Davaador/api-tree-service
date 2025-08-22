@@ -67,7 +67,7 @@ public class ChildService {
         Customer customer = utilService.findByCustomer();
         if (customer.getGender().equals(Constants.WOMEN_GENDER)) {
             if (Objects.isNull(customer.getHusband()))
-                throw new CustomException(Errors.NOT_HUSBAND);
+                return new ArrayList<>();
             customer = customer.getHusband();
         }
 
