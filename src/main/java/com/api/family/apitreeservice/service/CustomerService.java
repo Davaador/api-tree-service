@@ -86,7 +86,11 @@ public class CustomerService {
     public void updateProfileData(@NotNull UserDto userDto) {
         User user = jwtTokenGenerate.getUser();
         Customer customer = utilService.findByCustomer();
-        customer.setEmail(userDto.getEmail());
+        if (!customer.getEmail().equalsIgnoreCase(userDto.getEmail())) {
+            utilService.checkIfCustomerInEmail(userDto.getEmail(), Boolean.FALSE,
+                    Errors.NOT_CUSTOMER_EMAIL);
+            customer.setEmail(userDto.getEmail());
+        }
         customer.setBirthDate(userDto.getBirthDate());
         customer.setRegister(userDto.getRegister());
         customer.setModifiedDate(LocalDateTime.now());
@@ -110,7 +114,6 @@ public class CustomerService {
         customers = customers.stream().filter(c -> c.getUser().isEnabled()).toList();
         return customers.stream().map(x -> modelMapper.map(x, CustomerDto.class)).toList();
     }
-
 
     @Transactional
     public CoupleDto saveCouple(@NotNull CustomerCoupleDto customerParentDto) {
@@ -155,12 +158,14 @@ public class CustomerService {
 
     public Page<CoupleDto> findByActiveAllCustomers(@Valid CustomerFilter filter) {
         Specification<Customer> spec = Specification.where(null);
-//        if (StringUtils.isNotBlank(filter.getPhoneNumber())) {
-//            spec = spec.and(customerSpecs.customerContainsEnabled(filter.getPhoneNumber(), ""));
-//        }
-//        if(StringUtils.isNotBlank(filter.getLastName())) {
-        spec = spec.and(customerSpecs.customerContainsEnabled(filter.getPhoneNumber(), filter.getLastName(), filter.getFirstName()));
-//        }
+        // if (StringUtils.isNotBlank(filter.getPhoneNumber())) {
+        // spec =
+        // spec.and(customerSpecs.customerContainsEnabled(filter.getPhoneNumber(), ""));
+        // }
+        // if(StringUtils.isNotBlank(filter.getLastName())) {
+        spec = spec.and(customerSpecs.customerContainsEnabled(filter.getPhoneNumber(), filter.getLastName(),
+                filter.getFirstName()));
+        // }
         Sort.Direction direction = filter.getIsSortAscending() == 1 ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sort = Sort.by(direction, "birthDate");
         Pageable pageable = PageRequest.of(filter.getPage(), filter.getSize(), sort);

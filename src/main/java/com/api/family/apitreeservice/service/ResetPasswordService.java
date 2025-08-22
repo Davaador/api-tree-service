@@ -38,9 +38,11 @@ public class ResetPasswordService {
     private final CustomerOtpRepository customerOtpRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final UtilService utilService;
 
     public void sendToOtp(@Valid ResetPasswordDto resetPasswordDto) {
-        Customer customer = this.checkIfCustomerInEmail(resetPasswordDto.getEmail());
+        Customer customer = utilService.checkIfCustomerInEmail(resetPasswordDto.getEmail(), Boolean.TRUE,
+                Errors.NOT_EMAIL);
         if (Objects.isNull(customer))
             throw new CustomException(Errors.NOT_EMAIL);
         List<CustomerOtp> customerOtps = customerOtpRepository.findByCustomerAndStatus(customer,
@@ -79,7 +81,8 @@ public class ResetPasswordService {
                 if (otp.equals(Boolean.TRUE)) {
                     customerOtp.setStatus(OtpStatusEnumString.SUCCESS.getValue());
                     customerOtpRepository.save(customerOtp);
-                    Customer customer = this.checkIfCustomerInEmail(resetPasswordDto.getEmail());
+                    Customer customer = utilService.checkIfCustomerInEmail(resetPasswordDto.getEmail(), Boolean.TRUE,
+                            Errors.NOT_EMAIL);
                     String token = UUID.randomUUID().toString();
                     customer.setResetToken(token);
                     customerRepository.save(customer);
@@ -101,7 +104,8 @@ public class ResetPasswordService {
     }
 
     public void resetPassword(@Valid ResetPasswordDto resetPasswordDto) {
-        Customer customer = this.checkIfCustomerInEmail(resetPasswordDto.getEmail());
+        Customer customer = utilService.checkIfCustomerInEmail(resetPasswordDto.getEmail(), Boolean.TRUE,
+                Errors.NOT_EMAIL);
         if (Objects.isNull(customer))
             throw new CustomException(Errors.NOT_EMAIL);
         if (resetPasswordDto.getResetToken().equals(customer.getResetToken())) {
@@ -120,15 +124,5 @@ public class ResetPasswordService {
             customerOtpRepository.save(customerOtp);
             throw new CustomException(Errors.NOT_CUSTOMER_OTP_COUNT);
         }
-    }
-
-    public Customer checkIfCustomerInEmail(String email) {
-        if (StringUtils.isNotEmpty(email)) {
-            Optional<Customer> opCustomer = customerRepository.findByEmail(email);
-            if (opCustomer.isEmpty())
-                throw new CustomException(Errors.NOT_EMAIL);
-            return opCustomer.get();
-        }
-        return null;
     }
 }
