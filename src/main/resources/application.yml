@@ -2,16 +2,16 @@ spring:
   application:
     name: api-tree-service
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://dpg-d2mi6p95pdvs738seek0-a:5432/ms_family_tree}
     # username: ${SPRING_DATASOURCE_USERNAME}
     # password: ${SPRING_DATASOURCE_PASSWORD}
     # url: jdbc:postgresql://localhost:5433/ms_family_tree
     username: ${SPRING_DATASOURCE_USERNAME:daaduu}
-    password: ${SPRING_DATASOURCE_PASSWORD:KiDavaa08}
+    password: ${SPRING_DATASOURCE_PASSWORD:nzWEASAlVBjjyVdJAonKcKStcvfACMYR}
     driver-class-name: org.postgresql.Driver
   devtools:
     restart:
-      enabled: true
+      enabled: false
   jpa:
     hibernate:
       ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
