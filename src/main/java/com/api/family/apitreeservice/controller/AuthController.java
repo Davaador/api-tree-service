@@ -26,7 +26,7 @@ public class AuthController {
     private final AuthService authService;
     private final ResetPasswordService resetPasswordService;
 
-    @PostMapping("/api/token")
+    @PostMapping("/token")
     public Token token(@RequestBody Credentials credentials, HttpServletResponse response) {
 
         var token = authService.authenticate(credentials);
