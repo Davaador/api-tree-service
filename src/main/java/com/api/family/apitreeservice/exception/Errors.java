@@ -52,19 +52,21 @@ public class Errors {
                         "Гэр бүлийн гишүүнээ сонгоно уу.");
         public static final CustomError NOT_CHILD = new CustomError(HttpStatus.BAD_REQUEST, "API0013",
                         "Таньд бүртгүүлсэн хүүхдийн мэдээлэл байхгүй байна.");
-        public static final CustomError NOT_EMAIL = new CustomError(HttpStatus.BAD_REQUEST, "API0013",
+        public static final CustomError NOT_EMAIL = new CustomError(HttpStatus.BAD_REQUEST, "API0014",
                         "Тухайн майл дээр бүртгүүлсэн харилцагч байхгүй байна.");
-        public static final CustomError NOT_CUSTOMER_OTP = new CustomError(HttpStatus.BAD_REQUEST, "API0013",
+        public static final CustomError NOT_CUSTOMER_OTP = new CustomError(HttpStatus.BAD_REQUEST, "API0015",
                         "Таньд нэг удаагийн код үүсээгүй байна.");
-        public static final CustomError NOT_CUSTOMER_OTP_EXPIRY = new CustomError(HttpStatus.BAD_REQUEST, "API0013",
+        public static final CustomError NOT_CUSTOMER_OTP_EXPIRY = new CustomError(HttpStatus.BAD_REQUEST, "API0016",
                         "Таны нэг удаагийн кодны хугацаа дууссан байна.");
-        public static final CustomError NOT_CUSTOMER_OTP_EQUALS = new CustomError(HttpStatus.BAD_REQUEST, "API0013",
+        public static final CustomError NOT_CUSTOMER_OTP_EQUALS = new CustomError(HttpStatus.BAD_REQUEST, "API0017",
                         "Таны нэг удаагийн код буруу байна.");
-        public static final CustomError NOT_CUSTOMER_OTP_COUNT = new CustomError(HttpStatus.BAD_REQUEST, "API0013",
+        public static final CustomError NOT_CUSTOMER_OTP_COUNT = new CustomError(HttpStatus.BAD_REQUEST, "API0018",
                         "Таны нэг удаагийн кодоо 3 удаа буруу оруулсан байна.");
-        public static final CustomError NOT_CUSTOMER_RESET_TOKEN = new CustomError(HttpStatus.BAD_REQUEST, "API0013",
+        public static final CustomError NOT_CUSTOMER_RESET_TOKEN = new CustomError(HttpStatus.BAD_REQUEST, "API0019",
                         "Таны мэдээлэл таарсангүй.");
-        public static final CustomError NOT_CUSTOMER_EMAIL = new CustomError(HttpStatus.BAD_REQUEST, "API0013",
+        public static final CustomError NOT_CUSTOMER_EMAIL = new CustomError(HttpStatus.BAD_REQUEST, "API0020",
                         "Тухайн майл бүртгэлтэй байна.");
+        public static final CustomError ADMIN_DUPLICATE = new CustomError(HttpStatus.BAD_REQUEST, "API0021",
+                        "Админаар бүртгүүлсэн байна.");
 
 }
