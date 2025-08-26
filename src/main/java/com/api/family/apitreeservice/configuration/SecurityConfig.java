@@ -50,7 +50,8 @@ public class SecurityConfig {
         return http.cors(cors -> cors.configurationSource(corsConfigurationSource())).authorizeHttpRequests(
                 requests -> requests.requestMatchers(HttpMethod.OPTIONS).permitAll()
                         .requestMatchers("/health/**", "/metrics", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/auth/token", "/auth/user/register", "/auth/sent/otp", "/auth/check/otp",
+                        .requestMatchers("/api/auth/token", "/auth/token", "/auth/user/register", "/auth/sent/otp",
+                                "/auth/check/otp",
                                 "/auth/reset/password")
                         .permitAll()
                         .anyRequest()
