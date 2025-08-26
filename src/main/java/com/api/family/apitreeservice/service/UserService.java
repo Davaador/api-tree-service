@@ -1,19 +1,8 @@
 package com.api.family.apitreeservice.service;
 
-import com.api.family.apitreeservice.constants.Constants;
-import com.api.family.apitreeservice.constants.RoleEnumString;
-import com.api.family.apitreeservice.exception.CustomException;
-import com.api.family.apitreeservice.exception.Errors;
-import com.api.family.apitreeservice.model.dto.Pagination;
-import com.api.family.apitreeservice.model.dto.customer.CustomerDto;
-import com.api.family.apitreeservice.model.dto.user.UserDto;
-import com.api.family.apitreeservice.model.postgres.Customer;
-import com.api.family.apitreeservice.model.postgres.User;
-import com.api.family.apitreeservice.repository.UserRepository;
-import com.api.family.apitreeservice.spec.UserSpecs;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -23,6 +12,22 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+
+import com.api.family.apitreeservice.constants.RoleEnumString;
+import com.api.family.apitreeservice.exception.CustomException;
+import com.api.family.apitreeservice.exception.Errors;
+import com.api.family.apitreeservice.model.dto.Pagination;
+import com.api.family.apitreeservice.model.dto.user.UserDto;
+import com.api.family.apitreeservice.model.postgres.Customer;
+import com.api.family.apitreeservice.model.postgres.RoleUsers;
+import com.api.family.apitreeservice.model.postgres.User;
+import com.api.family.apitreeservice.repository.RoleUsersRepository;
+import com.api.family.apitreeservice.repository.UserRepository;
+import com.api.family.apitreeservice.spec.UserSpecs;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Validated
@@ -35,6 +40,7 @@ public class UserService {
     private final UserSpecs userSpecs;
     private final UtilService utilService;
     private final CustomerService customerService;
+    private final RoleUsersRepository roleUsersRepository;
 
     public UserDto create(@Valid UserDto userDto) {
         this.checkIfDuplicate(userDto.getPhoneNumber(), userDto.getRegister());
@@ -56,12 +62,16 @@ public class UserService {
     }
 
     public RoleEnumString checkRoleUser(String phoneNumber) {
-        if (Constants.ROOT_NUMBERS.contains(phoneNumber)) {
-            return RoleEnumString.ROLE_ROOT;
-        } else if (Constants.ADMIN_NUMBERS.contains(phoneNumber)) {
-            return RoleEnumString.ROLE_ADMIN;
+        List<RoleUsers> roleUsers = roleUsersRepository.findAll();
+        Optional<RoleUsers> optionalRole = roleUsers.stream().filter(r -> r.getPhoneNumber().equals(phoneNumber))
+                .findFirst();
+        if (optionalRole.isPresent()) {
+            if (optionalRole.get().getRoleName().equals(RoleEnumString.ROLE_ROOT.getValue())) {
+                return RoleEnumString.ROLE_ROOT;
+            } else {
+                return RoleEnumString.ROLE_ADMIN;
+            }
         }
-
         return RoleEnumString.ROLE_CUSTOMER;
     }
 
