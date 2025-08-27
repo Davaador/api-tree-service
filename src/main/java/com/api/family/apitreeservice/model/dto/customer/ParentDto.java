@@ -1,14 +1,15 @@
 package com.api.family.apitreeservice.model.dto.customer;
 
-import com.api.family.apitreeservice.model.dto.file.FileObjectDto;
+import java.util.Date;
+import java.util.List;
+
 import com.api.family.apitreeservice.model.postgres.Customer;
+import com.api.family.apitreeservice.model.postgres.Image;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -25,5 +26,5 @@ public class ParentDto {
     private Customer husband;
     private Customer wife;
     private List<ParentDto> children;
-    private FileObjectDto profilePicture;
+    private Image profileImage;
 }

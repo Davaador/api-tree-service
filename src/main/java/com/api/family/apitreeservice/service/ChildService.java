@@ -1,5 +1,16 @@
 package com.api.family.apitreeservice.service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import com.api.family.apitreeservice.constants.Constants;
 import com.api.family.apitreeservice.constants.RoleEnumString;
 import com.api.family.apitreeservice.exception.CustomException;
@@ -10,27 +21,16 @@ import com.api.family.apitreeservice.model.dto.user.UserDto;
 import com.api.family.apitreeservice.model.postgres.Customer;
 import com.api.family.apitreeservice.model.postgres.User;
 import com.api.family.apitreeservice.repository.CustomerRepository;
-import com.api.family.apitreeservice.repository.UserRepository;
+
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.modelmapper.ModelMapper;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 @Log4j2
 public class ChildService {
     private final CustomerRepository customerRepository;
-    private final UserRepository userRepository;
     private final CustomerService customerService;
     private final UtilService utilService;
     private final RoleService roleService;

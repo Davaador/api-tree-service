@@ -46,3 +46,10 @@ management:
       base-path: /
       exposure:
         include: metrics, health
+
+cloudinary:
+  cloud-name: dyntquf1i
+  api-key: 748651478547981
+  api-secret: EdfGyKUvPcuc6Y0doG_MFhGvHFc
+
+CLOUDINARY_URL: cloudinary://748651478547981:EdfGyKUvPcuc6Y0doG_MFhGvHFc@dyntquf1i

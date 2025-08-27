@@ -1,21 +1,21 @@
-package com.api.family.apitreeservice.model.dto.customer;
+package com.api.family.apitreeservice.model.dto.admin;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 import com.api.family.apitreeservice.model.dto.user.UserDto;
 import com.api.family.apitreeservice.model.postgres.Customer;
-import com.api.family.apitreeservice.model.postgres.Image;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Data
-@RequiredArgsConstructor
-public class CoupleDto {
+@AllArgsConstructor
+@NoArgsConstructor
+public class AdminCreateDto {
     private Integer id;
-    private String firstName;
     private String lastName;
+    private String firstName;
     private String register;
     private String surName;
     private Date birthDate;
@@ -23,12 +23,9 @@ public class CoupleDto {
     private String gender;
     private String phoneNumber;
     private String email;
-    private boolean editCustomer = false;
-    private LocalDateTime modifiedDate = LocalDateTime.now();
     private UserDto user;
-    private Customer wife;
+    private Customer spouse;
     private Customer husband;
-    private Customer parent;
-    private Image profileImage;
+    private Customer wife;
 
 }

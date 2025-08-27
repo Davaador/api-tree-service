@@ -1,23 +1,14 @@
 package com.api.family.apitreeservice.service;
 
-import com.api.family.apitreeservice.constants.Constants;
-import com.api.family.apitreeservice.exception.CustomException;
-import com.api.family.apitreeservice.exception.Errors;
-import com.api.family.apitreeservice.model.dto.child.ChildDto;
-import com.api.family.apitreeservice.model.dto.customer.CoupleDto;
-import com.api.family.apitreeservice.model.dto.customer.CustomerCoupleDto;
-import com.api.family.apitreeservice.model.dto.customer.CustomerDto;
-import com.api.family.apitreeservice.model.dto.customer.CustomerFilter;
-import com.api.family.apitreeservice.model.dto.user.UserDto;
-import com.api.family.apitreeservice.model.postgres.Customer;
-import com.api.family.apitreeservice.model.postgres.User;
-import com.api.family.apitreeservice.model.response.Dashboard;
-import com.api.family.apitreeservice.repository.CustomerRepository;
-import com.api.family.apitreeservice.spec.CustomerSpecs;
-import com.api.family.apitreeservice.validator.JwtTokenGenerate;
-import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -27,12 +18,29 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import com.api.family.apitreeservice.constants.Constants;
+import com.api.family.apitreeservice.controller.ImageRepository;
+import com.api.family.apitreeservice.exception.CustomException;
+import com.api.family.apitreeservice.exception.Errors;
+import com.api.family.apitreeservice.model.dto.child.ChildDto;
+import com.api.family.apitreeservice.model.dto.customer.CoupleDto;
+import com.api.family.apitreeservice.model.dto.customer.CustomerCoupleDto;
+import com.api.family.apitreeservice.model.dto.customer.CustomerDto;
+import com.api.family.apitreeservice.model.dto.customer.CustomerFilter;
+import com.api.family.apitreeservice.model.dto.user.UserDto;
+import com.api.family.apitreeservice.model.postgres.Customer;
+import com.api.family.apitreeservice.model.postgres.Image;
+import com.api.family.apitreeservice.model.postgres.User;
+import com.api.family.apitreeservice.model.response.Dashboard;
+import com.api.family.apitreeservice.repository.CustomerRepository;
+import com.api.family.apitreeservice.spec.CustomerSpecs;
+import com.api.family.apitreeservice.validator.JwtTokenGenerate;
+
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -41,8 +49,9 @@ public class CustomerService {
     private final JwtTokenGenerate jwtTokenGenerate;
     private final ModelMapper modelMapper;
     private final UtilService utilService;
-    private final FileObjectService fileObjectService;
     private final CustomerSpecs customerSpecs;
+    private final CloudinaryService cloudinaryService;
+    private final ImageRepository imageRepository;
 
     public Customer create(UserDto userDto, User user) {
         Customer customer = new Customer(userDto, user);
@@ -59,34 +68,47 @@ public class CustomerService {
         return customerRepository.findByRegister(register).isPresent();
     }
 
+    public Image updateImage(MultipartFile file) throws IOException {
+        Customer customer = utilService.findByCustomer();
+        Map result = cloudinaryService.uploadImage(file, customer.getId());
+        // Cloudinary-с ирсэн мэдээлэл
+        String publicId = (String) result.get("public_id");
+        String url = (String) result.get("secure_url");
+        Long imageId = null;
+        if (Objects.nonNull(customer.getProfileImage())) {
+            imageId = customer.getProfileImage().getId();
+        }
+
+        Image image = new Image();
+        image.setPublicId(publicId);
+        image.setUrl(url);
+        var saveImage = imageRepository.save(image);
+        customer.setProfileImage(saveImage);
+        customerRepository.save(customer);
+        if (imageId != null) {
+            var deleteImage = imageRepository.findById(imageId);
+            if (deleteImage.isPresent()) {
+                imageRepository.delete(deleteImage.get());
+                cloudinaryService.deleteImage(deleteImage.get().getPublicId());
+            }
+        }
+        return saveImage;
+    }
+
     public CoupleDto updateInfo(@NotNull CustomerDto customerDto) {
         Customer customer = utilService.findByCustomer();
         customer.setSurName(customerDto.getSurName());
         customer.setFirstName(customerDto.getFirstName());
         customer.setLastName(customerDto.getLastName());
         customer.setModifiedDate(LocalDateTime.now());
-        Long imageId = null;
-        if (Objects.nonNull(customerDto.getProfilePicture())) {
-            var image = fileObjectService.getDaoById(customerDto.getProfilePicture().getId());
-            if (Objects.nonNull(customer.getProfilePicture())) {
-                imageId = customer.getProfilePicture().getId();
-                if (!image.getId().equals(imageId)) {
-                    customer.setProfilePicture(image);
-                }
-            } else {
-                customer.setProfilePicture(image);
-            }
-        }
         var saveCustomer = customerRepository.save(customer);
-        if (imageId != null)
-            fileObjectService.deleteById(imageId);
         return modelMapper.map(saveCustomer, CoupleDto.class);
     }
 
     public void updateProfileData(@NotNull UserDto userDto) {
         User user = jwtTokenGenerate.getUser();
         Customer customer = utilService.findByCustomer();
-        if (!customer.getEmail().equalsIgnoreCase(userDto.getEmail())) {
+        if (StringUtils.isEmpty(customer.getEmail()) || !customer.getEmail().equalsIgnoreCase(userDto.getEmail())) {
             utilService.checkIfCustomerInEmail(userDto.getEmail(), Boolean.FALSE,
                     Errors.NOT_CUSTOMER_EMAIL);
             customer.setEmail(userDto.getEmail());

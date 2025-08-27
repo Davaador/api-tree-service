@@ -1,23 +1,34 @@
 package com.api.family.apitreeservice.model.postgres;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
+import org.hibernate.annotations.SoftDelete;
+import org.jetbrains.annotations.NotNull;
+
 import com.api.family.apitreeservice.constants.Constants;
 import com.api.family.apitreeservice.model.dto.child.ChildDto;
 import com.api.family.apitreeservice.model.dto.user.UserDto;
-import com.api.family.apitreeservice.model.response.FileObject;
 import com.api.family.apitreeservice.validator.Functions;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.SoftDelete;
-import org.jetbrains.annotations.NotNull;
-
-import java.time.LocalDateTime;
-import java.util.Date;
 
 @Data
 @NoArgsConstructor
@@ -66,9 +77,8 @@ public class Customer {
     @JsonManagedReference
     @JsonIgnore
     private Customer parent;
-
     @OneToOne(cascade = CascadeType.MERGE)
-    private FileObject profilePicture;
+    private Image profileImage;
     private String resetToken;
 
     public Customer(@NotNull UserDto userDto, User user) {
