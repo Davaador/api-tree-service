@@ -58,7 +58,7 @@ public class ParentService {
         ParentDto parentDto = null;
         List<Customer> customers = customerRepository.findByParent(null);
         Optional<Customer> parent = customers.stream().filter(c -> c.getUser().isEnabled()
-                && c.getIsParent() == 0).findFirst();
+                && c.getIsParent() != null && c.getIsParent() == 0).findFirst();
         if (parent.isPresent())
             parentDto = modelMapper.map(parent.get(), ParentDto.class);
 
