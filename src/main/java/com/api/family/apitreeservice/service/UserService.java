@@ -17,6 +17,7 @@ import com.api.family.apitreeservice.constants.RoleEnumString;
 import com.api.family.apitreeservice.exception.CustomException;
 import com.api.family.apitreeservice.exception.Errors;
 import com.api.family.apitreeservice.model.dto.Pagination;
+import com.api.family.apitreeservice.model.dto.admin.AdminCreateDto;
 import com.api.family.apitreeservice.model.dto.user.UserDto;
 import com.api.family.apitreeservice.model.postgres.Customer;
 import com.api.family.apitreeservice.model.postgres.RoleUsers;
@@ -51,7 +52,7 @@ public class UserService {
         if (role.getName().equals(RoleEnumString.ROLE_ROOT.getValue())) {
             user.setEnabled(Boolean.TRUE);
             userDto.setIsParent(0);
-            userDto.setAge(19);
+            userDto.setAge(21);
         } else if (RoleEnumString.ROLE_ADMIN.getValue().equals(role.getName())) {
             user.setEnabled(Boolean.TRUE);
         }
@@ -113,6 +114,22 @@ public class UserService {
 
     public User getById(@NotNull Long id) {
         return userRepository.findById(id).orElseThrow(() -> new CustomException(Errors.NOT_PENDING_USERS));
+    }
+
+    public Customer getByCustomer(@NotNull int id) {
+        return customerService.findById(id);
+    }
+
+    public Customer createAdminCustomer(AdminCreateDto adminCreateDto, User user, Customer parentCustomer) {
+        return customerService.createAdminCustomer(adminCreateDto, user, parentCustomer);
+    }
+
+    public Customer updateCustomer(Customer customer) {
+        return customerService.updateCustomer(customer);
+    }
+
+    public void deleteCustomer(Integer id) {
+        customerService.deleteCustomer(id);
     }
 
 }

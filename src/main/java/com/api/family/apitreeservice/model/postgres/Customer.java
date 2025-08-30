@@ -7,6 +7,7 @@ import org.hibernate.annotations.SoftDelete;
 import org.jetbrains.annotations.NotNull;
 
 import com.api.family.apitreeservice.constants.Constants;
+import com.api.family.apitreeservice.model.dto.admin.AdminCreateDto;
 import com.api.family.apitreeservice.model.dto.child.ChildDto;
 import com.api.family.apitreeservice.model.dto.user.UserDto;
 import com.api.family.apitreeservice.validator.Functions;
@@ -55,6 +56,8 @@ public class Customer {
     private boolean editCustomer = false;
     private LocalDateTime modifiedDate = LocalDateTime.now();
     private Integer isParent;
+    private Boolean isDeceased = false;
+    private Date deceasedDate;
 
     @JsonBackReference
     @OneToOne(cascade = CascadeType.ALL)
@@ -80,6 +83,8 @@ public class Customer {
     @OneToOne(cascade = CascadeType.MERGE)
     private Image profileImage;
     private String resetToken;
+    @OneToOne(mappedBy = "newCustomer")
+    private AdminCustomer adminCustomer;
 
     public Customer(@NotNull UserDto userDto, User user) {
         this.firstName = userDto.getFirstName();
@@ -109,6 +114,25 @@ public class Customer {
         this.phoneNumber = Constants.CHILD_PHONE;
         this.editCustomer = Boolean.TRUE;
         this.birthDate = Functions.getBirthday(childDto.getRegister());
+    }
+
+    public Customer(@NotNull AdminCreateDto adminCreateDto, User user) {
+        this.firstName = adminCreateDto.getFirstName();
+        this.lastName = adminCreateDto.getLastName();
+        this.register = adminCreateDto.getRegister();
+        this.surName = adminCreateDto.getSurName();
+        this.birthDate = adminCreateDto.getBirthDate();
+        this.age = adminCreateDto.getAge();
+        this.phoneNumber = adminCreateDto.getPhoneNumber();
+        this.user = user;
+        this.gender = Integer.parseInt(String.valueOf(adminCreateDto.getRegister()
+                .charAt(adminCreateDto.getRegister().length() - 2))) % 2 == 0
+                        ? Constants.WOMEN_GENDER
+                        : Constants.MEN_GENDER;
+        this.isParent = 0;
+        this.editCustomer = Boolean.TRUE;
+        this.isDeceased = adminCreateDto.getIsDeceased() != null ? adminCreateDto.getIsDeceased() : false;
+        this.deceasedDate = adminCreateDto.getDeceasedDate();
     }
 
 }
