@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -21,9 +20,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.api.family.apitreeservice.constants.Constants;
-import com.api.family.apitreeservice.controller.ImageRepository;
 import com.api.family.apitreeservice.exception.CustomException;
 import com.api.family.apitreeservice.exception.Errors;
+import com.api.family.apitreeservice.model.dto.admin.AdminCreateDto;
 import com.api.family.apitreeservice.model.dto.child.ChildDto;
 import com.api.family.apitreeservice.model.dto.customer.CoupleDto;
 import com.api.family.apitreeservice.model.dto.customer.CustomerCoupleDto;
@@ -51,7 +50,13 @@ public class CustomerService {
     private final UtilService utilService;
     private final CustomerSpecs customerSpecs;
     private final CloudinaryService cloudinaryService;
-    private final ImageRepository imageRepository;
+
+    public Customer createAdminCustomer(AdminCreateDto adminCreateDto, User user, Customer parentCustomer) {
+        Customer customer = new Customer(adminCreateDto, user);
+        customer.setLastName(parentCustomer.getFirstName());
+        customer.setParent(parentCustomer);
+        return customerRepository.save(customer);
+    }
 
     public Customer create(UserDto userDto, User user) {
         Customer customer = new Customer(userDto, user);
@@ -70,38 +75,27 @@ public class CustomerService {
 
     public Image updateImage(MultipartFile file) throws IOException {
         Customer customer = utilService.findByCustomer();
-        Map result = cloudinaryService.uploadImage(file, customer.getId());
-        // Cloudinary-с ирсэн мэдээлэл
-        String publicId = (String) result.get("public_id");
-        String url = (String) result.get("secure_url");
-        Long imageId = null;
-        if (Objects.nonNull(customer.getProfileImage())) {
-            imageId = customer.getProfileImage().getId();
+        Image images = cloudinaryService.uploadImage(file, customer);
+        if (Objects.isNull(customer.getProfileImage())) {
+            customer.setProfileImage(images);
+            customerRepository.save(customer);
         }
-
-        Image image = new Image();
-        image.setPublicId(publicId);
-        image.setUrl(url);
-        var saveImage = imageRepository.save(image);
-        customer.setProfileImage(saveImage);
-        customerRepository.save(customer);
-        if (imageId != null) {
-            var deleteImage = imageRepository.findById(imageId);
-            if (deleteImage.isPresent()) {
-                imageRepository.delete(deleteImage.get());
-                cloudinaryService.deleteImage(deleteImage.get().getPublicId());
-            }
-        }
-        return saveImage;
+        return images;
     }
 
     public CoupleDto updateInfo(@NotNull CustomerDto customerDto) {
         Customer customer = utilService.findByCustomer();
+        Image oldImage = customer.getProfileImage();
         customer.setSurName(customerDto.getSurName());
         customer.setFirstName(customerDto.getFirstName());
         customer.setLastName(customerDto.getLastName());
         customer.setModifiedDate(LocalDateTime.now());
+        if (Objects.isNull(customerDto.getProfileImage()))
+            customer.setProfileImage(null);
         var saveCustomer = customerRepository.save(customer);
+        if (Objects.nonNull(oldImage) && Objects.isNull(customerDto.getProfileImage()))
+            cloudinaryService.deleteImages(oldImage);
+
         return modelMapper.map(saveCustomer, CoupleDto.class);
     }
 
@@ -194,5 +188,19 @@ public class CustomerService {
         var list = customerRepository.findAll(spec, pageable);
         return list.map(x -> modelMapper.map(x, CoupleDto.class));
 
+    }
+
+    public Customer findById(Integer id) {
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new CustomException(Errors.NOT_PENDING_USERS));
+    }
+
+    public Customer updateCustomer(Customer customer) {
+        return customerRepository.save(customer);
+    }
+
+    public void deleteCustomer(Integer id) {
+        Customer customer = findById(id);
+        customerRepository.delete(customer);
     }
 }

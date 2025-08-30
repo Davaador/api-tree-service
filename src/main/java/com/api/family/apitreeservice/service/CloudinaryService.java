@@ -1,13 +1,17 @@
 package com.api.family.apitreeservice.service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.api.family.apitreeservice.controller.ImageRepository;
+import com.api.family.apitreeservice.model.postgres.Customer;
+import com.api.family.apitreeservice.model.postgres.Image;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
@@ -32,7 +36,35 @@ public class CloudinaryService {
         Map options = ObjectUtils.asMap(
                 "folder", folderName);
         return cloudinary.uploader().upload(file.getBytes(), options);
-        // return uploadResult.get("secure_url").toString(); // HTTPS зурагны хаяг
+    }
+
+    public Image uploadImage(MultipartFile file, Customer customer) throws IOException {
+        Map result = this.uploadImage(file, customer.getId());
+        String publicId = (String) result.get("public_id");
+        String url = (String) result.get("secure_url");
+        Image newImage = new Image();
+        if (Objects.nonNull(customer.getProfileImage())) {
+            var customerImage = imageRepository.findById(customer.getProfileImage().getId());
+            if (customerImage.isPresent()) {
+                newImage = customerImage.get();
+                this.deleteImage(newImage.getPublicId());
+                newImage.setPublicId(publicId);
+                newImage.setUrl(url);
+                newImage.setUploadedAt(LocalDateTime.now());
+                return imageRepository.save(newImage);
+            }
+        }
+        newImage.setPublicId(publicId);
+        newImage.setUrl(url);
+        return imageRepository.save(newImage);
+    }
+
+    public void deleteImages(Image image) {
+        var customerImage = imageRepository.findById(image.getId());
+        if (customerImage.isPresent()) {
+            this.deleteImage(customerImage.get().getPublicId());
+            imageRepository.delete(customerImage.get());
+        }
     }
 
     public String deleteImage(String publicId) {

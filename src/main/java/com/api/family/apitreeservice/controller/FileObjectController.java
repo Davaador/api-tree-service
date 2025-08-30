@@ -21,7 +21,7 @@ public class FileObjectController {
     private final CustomerService customerService;
 
     @PostMapping
-    public Image uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
+    public Image uploadFile(@RequestParam MultipartFile file) throws IOException {
         return customerService.updateImage(file);
     }
 

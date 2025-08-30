@@ -24,7 +24,9 @@ public class UtilService {
 
     public void checkAdmin() {
         var tokenUser = jwtTokenGenerate.getUser();
-        tokenUser.getRoles().stream().filter(x -> !x.getName().equals(RoleEnumString.ROLE_CUSTOMER.getValue()))
+        tokenUser.getRoles().stream()
+                .filter(x -> x.getName().equals(RoleEnumString.ROLE_ROOT.getValue())
+                        || x.getName().equals(RoleEnumString.ROLE_ADMIN.getValue()))
                 .findFirst().orElseThrow(() -> new CustomException(Errors.NOT_ADMIN));
     }
 
