@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.api.family.apitreeservice.model.dto.user.UserDto;
 import com.api.family.apitreeservice.model.postgres.Customer;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,9 +24,12 @@ public class AdminCreateDto {
     private String gender;
     private String phoneNumber;
     private String email;
-    private UserDto user;
-    private Customer spouse;
-    private Customer husband;
-    private Customer wife;
+    private Integer lastNameId;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String password;
+    private String confirmPassword;
+    private Customer parent;
+    private Boolean isDeceased;
+    private Date deceasedDate;
 
 }
