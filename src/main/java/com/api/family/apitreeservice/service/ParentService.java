@@ -40,12 +40,19 @@ public class ParentService {
     public CoupleDto addParent(@NotNull AddParentDto addParentDto) {
         log.info("addParent started: ");
         Customer customer = utilService.findByCustomer();
+
+        // Handle parent relationship - either set or clear based on parentId
         if (addParentDto.getParentId() != null && addParentDto.getParentId() != 0) {
             Customer parentCustomer = customerRepository.findById(addParentDto.getParentId().longValue())
                     .orElseThrow(() -> new CustomException(Errors.NOT_PENDING_USERS));
             customer.setParent(parentCustomer);
             customer.setIsParent(addParentDto.getIsParent());
+        } else {
+            // Clear parent relationship when parentId is null or 0
+            customer.setParent(null);
+            customer.setIsParent(null);
         }
+
         customer.setSurName(addParentDto.getSurName());
         customer.setBirthDate(addParentDto.getBirthDate());
         customer.setAge(addParentDto.getAge());
