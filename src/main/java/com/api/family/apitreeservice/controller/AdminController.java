@@ -36,6 +36,12 @@ public class AdminController {
         return adminService.listRegisteredCustomersByCurrentAdmin();
     }
 
+    @GetMapping("/customers/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public CustomerSummaryDto getCustomerById(@PathVariable Integer id) {
+        return adminService.getCustomerById(id);
+    }
+
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public AdminCreateDto updateCustomer(@PathVariable Integer id, @RequestBody AdminCreateDto adminCreateDto) {
