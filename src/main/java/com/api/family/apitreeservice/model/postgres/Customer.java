@@ -129,7 +129,7 @@ public class Customer {
                 .charAt(adminCreateDto.getRegister().length() - 2))) % 2 == 0
                         ? Constants.WOMEN_GENDER
                         : Constants.MEN_GENDER;
-        this.isParent = 0;
+        this.isParent = adminCreateDto.getIsParent();
         this.editCustomer = Boolean.TRUE;
         this.isDeceased = adminCreateDto.getIsDeceased() != null ? adminCreateDto.getIsDeceased() : false;
         this.deceasedDate = adminCreateDto.getDeceasedDate();
