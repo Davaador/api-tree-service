@@ -10,6 +10,8 @@ import com.api.family.apitreeservice.model.postgres.Customer;
 import com.api.family.apitreeservice.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -38,15 +40,20 @@ public class ParentService {
     public CoupleDto addParent(@NotNull AddParentDto addParentDto) {
         log.info("addParent started: ");
         Customer customer = utilService.findByCustomer();
-        Customer parentCustomer = customerRepository.findById(addParentDto.getParentId().longValue())
-                .orElseThrow(() -> new CustomException(Errors.NOT_PENDING_USERS));
-        customer.setParent(parentCustomer);
-        customer.setIsParent(addParentDto.getIsParent());
+        if (addParentDto.getParentId() != null && addParentDto.getParentId() != 0) {
+            Customer parentCustomer = customerRepository.findById(addParentDto.getParentId().longValue())
+                    .orElseThrow(() -> new CustomException(Errors.NOT_PENDING_USERS));
+            customer.setParent(parentCustomer);
+            customer.setIsParent(addParentDto.getIsParent());
+        }
         customer.setSurName(addParentDto.getSurName());
         customer.setBirthDate(addParentDto.getBirthDate());
         customer.setAge(addParentDto.getAge());
-        utilService.checkIfCustomerInEmail(addParentDto.getEmail(), Boolean.FALSE, Errors.NOT_CUSTOMER_EMAIL);
-        customer.setEmail(addParentDto.getEmail());
+        if (StringUtils.isNotEmpty(addParentDto.getEmail())
+                && !addParentDto.getEmail().equalsIgnoreCase(customer.getEmail())) {
+            utilService.checkIfCustomerInEmail(addParentDto.getEmail(), Boolean.FALSE, Errors.NOT_CUSTOMER_EMAIL);
+            customer.setEmail(addParentDto.getEmail());
+        }
         customer.setModifiedDate(LocalDateTime.now());
         customer.setEditCustomer(Boolean.TRUE);
         customer = customerRepository.save(customer);
