@@ -53,7 +53,6 @@ public class CustomerService {
 
     public Customer createAdminCustomer(AdminCreateDto adminCreateDto, User user, Customer parentCustomer) {
         Customer customer = new Customer(adminCreateDto, user);
-        customer.setLastName(parentCustomer.getFirstName());
         customer.setParent(parentCustomer);
         return customerRepository.save(customer);
     }

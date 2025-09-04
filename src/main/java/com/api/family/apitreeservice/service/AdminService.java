@@ -92,6 +92,45 @@ public class AdminService {
                 .collect(Collectors.toList());
     }
 
+    public CustomerSummaryDto getCustomerById(Integer id) {
+        log.info("Getting customer by id: {}", id);
+        utilService.checkAdmin();
+
+        Customer current = utilService.findByCustomer();
+        Customer customer = userService.getByCustomer(id);
+
+        if (customer == null) {
+            throw new RuntimeException("Customer not found");
+        }
+
+        // Check if the customer belongs to the current admin
+        boolean belongsToAdmin = adminCustomerRepository.findCustomersByAdminId(current.getId())
+                .stream()
+                .anyMatch(c -> c.getId().equals(id));
+
+        if (!belongsToAdmin) {
+            throw new RuntimeException("Customer not found or access denied");
+        }
+
+        CustomerSummaryDto dto = new CustomerSummaryDto();
+        dto.setId(customer.getId());
+        dto.setFirstName(customer.getFirstName());
+        dto.setLastName(customer.getLastName());
+        dto.setPhoneNumber(customer.getPhoneNumber());
+        dto.setSurName(customer.getSurName());
+        dto.setEmail(customer.getEmail());
+        dto.setAge(customer.getAge());
+        dto.setRegister(customer.getRegister());
+        dto.setBirthDate(customer.getBirthDate());
+        dto.setIsDeceased(customer.getIsDeceased());
+        dto.setDeceasedDate(customer.getDeceasedDate());
+        dto.setIsParent(customer.getIsParent());
+        dto.setLastNameId(customer.getParent() != null ? customer.getParent().getId() : null);
+
+        log.info("Successfully retrieved customer with id: {}", id);
+        return dto;
+    }
+
     public AdminCreateDto updateCustomer(Integer id, AdminCreateDto adminCreateDto) {
         log.info("Updating admin customer with id: {}", id);
         utilService.checkAdmin();
@@ -113,6 +152,28 @@ public class AdminService {
         customerToUpdate.setAge(adminCreateDto.getAge());
         customerToUpdate.setIsDeceased(adminCreateDto.getIsDeceased() != null ? adminCreateDto.getIsDeceased() : false);
         customerToUpdate.setDeceasedDate(adminCreateDto.getDeceasedDate());
+
+        // Update isParent field
+        if (adminCreateDto.getIsParent() != null) {
+            customerToUpdate.setIsParent(adminCreateDto.getIsParent());
+        } else {
+            customerToUpdate.setIsParent(null);
+        }
+
+        // Update parent relationship
+        if (adminCreateDto.getLastNameId() != null) {
+            Customer parentCustomer = userService.getByCustomer(adminCreateDto.getLastNameId());
+            if (parentCustomer != null) {
+                customerToUpdate.setParent(parentCustomer);
+            } else {
+                log.warn("Parent customer with id {} not found, setting parent to null",
+                        adminCreateDto.getLastNameId());
+                customerToUpdate.setParent(null);
+            }
+        } else {
+            // If lastNameId is null, clear the parent relationship
+            customerToUpdate.setParent(null);
+        }
 
         Customer savedCustomer = userService.updateCustomer(customerToUpdate);
         var mappedAdminCustomerDto = modelMapper.map(savedCustomer, AdminCreateDto.class);

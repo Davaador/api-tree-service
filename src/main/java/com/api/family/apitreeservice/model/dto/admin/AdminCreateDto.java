@@ -2,7 +2,6 @@ package com.api.family.apitreeservice.model.dto.admin;
 
 import java.util.Date;
 
-import com.api.family.apitreeservice.model.dto.user.UserDto;
 import com.api.family.apitreeservice.model.postgres.Customer;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -31,5 +30,6 @@ public class AdminCreateDto {
     private Customer parent;
     private Boolean isDeceased;
     private Date deceasedDate;
+    private Integer isParent;
 
 }

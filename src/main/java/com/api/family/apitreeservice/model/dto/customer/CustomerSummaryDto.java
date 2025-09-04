@@ -17,4 +17,6 @@ public class CustomerSummaryDto {
     private java.util.Date birthDate;
     private Boolean isDeceased;
     private java.util.Date deceasedDate;
+    private Integer isParent;
+    private Integer lastNameId;
 }
