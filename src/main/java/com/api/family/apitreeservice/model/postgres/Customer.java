@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,7 +36,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @SoftDelete
 @Entity
-@Table(name = "customer", indexes = { @Index(name = "fn_customer_register", columnList = "register") })
+@Table(name = "customer", indexes = {
+        @Index(name = "idx_customer_register", columnList = "register"),
+        @Index(name = "idx_customer_email", columnList = "email"),
+        @Index(name = "idx_customer_phone", columnList = "phoneNumber"),
+        @Index(name = "idx_customer_gender", columnList = "gender"),
+        @Index(name = "idx_customer_is_parent", columnList = "isParent"),
+        @Index(name = "idx_customer_modified_date", columnList = "modifiedDate"),
+        @Index(name = "idx_customer_deceased", columnList = "isDeceased")
+})
 public class Customer {
 
     @Setter(AccessLevel.NONE)
@@ -60,22 +69,22 @@ public class Customer {
     private Date deceasedDate;
 
     @JsonBackReference
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private User user;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "wife_id")
     @JsonManagedReference
     @JsonIgnore
     private Customer wife;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "husband_id")
     @JsonManagedReference
     @JsonIgnore
     private Customer husband;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id")
     @JsonManagedReference
     @JsonIgnore

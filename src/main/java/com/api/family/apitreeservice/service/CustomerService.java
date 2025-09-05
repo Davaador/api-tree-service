@@ -10,7 +10,12 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.annotation.Timed;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -50,6 +55,12 @@ public class CustomerService {
     private final UtilService utilService;
     private final CustomerSpecs customerSpecs;
     private final CloudinaryService cloudinaryService;
+
+    // Metrics
+    private final Counter customerCreatedCounter;
+    private final Counter customerUpdatedCounter;
+    private final Counter customerDeletedCounter;
+    private final Timer customerServiceTimer;
 
     public Customer createAdminCustomer(AdminCreateDto adminCreateDto, User user, Customer parentCustomer) {
         Customer customer = new Customer(adminCreateDto, user);
@@ -189,12 +200,17 @@ public class CustomerService {
 
     }
 
+    @Cacheable(value = "customers", key = "#id")
+    @Timed("customer.service.findById")
     public Customer findById(Integer id) {
         return customerRepository.findById(id)
                 .orElseThrow(() -> new CustomException(Errors.NOT_PENDING_USERS));
     }
 
+    @CacheEvict(value = "customers", key = "#customer.id")
+    @Timed("customer.service.update")
     public Customer updateCustomer(Customer customer) {
+        customerUpdatedCounter.increment();
         return customerRepository.save(customer);
     }
 
