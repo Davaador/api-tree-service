@@ -3,12 +3,18 @@ spring:
     name: api-tree-service
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/ms_family_tree}
-    # username: ${SPRING_DATASOURCE_USERNAME}
-    # password: ${SPRING_DATASOURCE_PASSWORD}
-    # url: jdbc:postgresql://localhost:5433/ms_family_tree
     username: ${SPRING_DATASOURCE_USERNAME:daaduu}
     password: ${SPRING_DATASOURCE_PASSWORD:KiDavaa08}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+      minimum-idle: ${DB_POOL_MIN_IDLE:2}
+      connection-timeout: ${DB_CONNECTION_TIMEOUT:60000}
+      idle-timeout: ${DB_IDLE_TIMEOUT:300000}
+      max-lifetime: ${DB_MAX_LIFETIME:1200000}
+      leak-detection-threshold: ${DB_LEAK_DETECTION:60000}
+      validation-timeout: 5000
+      connection-test-query: SELECT 1
   devtools:
     restart:
       enabled: false
@@ -19,37 +25,137 @@ spring:
       hibernate:
         default_schema: family
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        # Performance optimizations
+        jdbc:
+          batch_size: ${HIBERNATE_BATCH_SIZE:10}
+          batch_versioned_data: false
+        order_inserts: false
+        order_updates: false
+        batch_fetch_style: legacy
+        # Query optimizations
+        query:
+          plan_cache_max_size: 2048
+          plan_parameter_metadata_max_size: 128
+        # Connection provider optimizations
+        connection:
+          provider_disables_autocommit: false
+          autocommit: true
+        # Second level cache
+        cache:
+          use_second_level_cache: ${HIBERNATE_USE_2LC:false}
+          use_query_cache: ${HIBERNATE_USE_QC:false}
+        # Transaction management
+        transaction:
+          timeout: 30
     open-in-view: false
     defer-datasource-initialization: true
+    show-sql: ${HIBERNATE_SHOW_SQL:false}
+    format-sql: ${HIBERNATE_FORMAT_SQL:false}
+
+
+server:
+  port: 8080
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info,metrics,prometheus,loggers,env,configprops,beans,threaddump,heapdump
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+        step: 30s
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+      slo:
+        http.server.requests: 50ms, 100ms, 200ms, 500ms
+  tracing:
+    sampling:
+      probability: 1.0
+  info:
+    env:
+      enabled: true
+    java:
+      enabled: true
+    build:
+      enabled: true
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=30m,expireAfterAccess=10m
   jackson:
     default-property-inclusion: non-null
     deserialization:
       fail-on-unknown-properties: false
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: davaatest@gmail.com
-    password: jrlg ntvt qvnv klop
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:davaatest@gmail.com}
+    password: ${MAIL_PASSWORD:jrlg ntvt qvnv klop}
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+    test-connection: false
+    enabled: true
 file:
   uploadDir: ${API_FILE_UPLOAD_DIR:./uploads}
-server:
-  port: 8080
-management:
-  endpoints:
-    web:
-      base-path: /
-      exposure:
-        include: metrics, health
+
+# Logging Configuration
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+    com.api.family.apitreeservice: ${APP_LOG_LEVEL:INFO}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:WARN}
+    org.hibernate.SQL: ${HIBERNATE_SQL_LOG:WARN}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${HIBERNATE_BINDER_LOG:WARN}
+    org.springframework.web: ${WEB_LOG_LEVEL:INFO}
+    org.springframework.cache: ${CACHE_LOG_LEVEL:DEBUG}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+  file:
+    name: ${LOG_FILE_PATH:./logs/application.log}
+    max-size: ${LOG_FILE_MAX_SIZE:100MB}
+    max-history: ${LOG_FILE_MAX_HISTORY:30}
+    total-size-cap: ${LOG_FILE_TOTAL_SIZE:1GB}
 
 cloudinary:
-  cloud-name: dyntquf1i
-  api-key: 748651478547981
-  api-secret: EdfGyKUvPcuc6Y0doG_MFhGvHFc
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:dyntquf1i}
+  api-key: ${CLOUDINARY_API_KEY:748651478547981}
+  api-secret: ${CLOUDINARY_API_SECRET:EdfGyKUvPcuc6Y0doG_MFhGvHFc}
 
-CLOUDINARY_URL: cloudinary://748651478547981:EdfGyKUvPcuc6Y0doG_MFhGvHFc@dyntquf1i
+CLOUDINARY_URL: ${CLOUDINARY_URL:cloudinary://748651478547981:EdfGyKUvPcuc6Y0doG_MFhGvHFc@dyntquf1i}
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:apisecretapisecretapisecretapisecretapisecretapisecretapisecret}
+  expiration: ${JWT_EXPIRATION:3600000} # 1 hour in milliseconds
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:86400000} # 24 hours in milliseconds
+  issuer: ${JWT_ISSUER:api-tree-service}
+
+# Security Configuration
+security:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3001}
+    allowed-methods: ${CORS_ALLOWED_METHODS:GET,POST,PUT,DELETE,OPTIONS}
+    allowed-headers: ${CORS_ALLOWED_HEADERS:Authorization,Content-Type,X-Requested-With,Accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers}
+    allow-credentials: ${CORS_ALLOW_CREDENTIALS:true}
+    max-age: ${CORS_MAX_AGE:3600}
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    requests-per-minute: ${RATE_LIMIT_REQUESTS:100}

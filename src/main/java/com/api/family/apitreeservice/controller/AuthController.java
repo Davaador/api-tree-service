@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -37,6 +39,19 @@ public class AuthController {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         return token;
 
+    }
+
+    @PostMapping("/refresh")
+    public Token refreshToken(@RequestBody Map<String, String> request, HttpServletResponse response) {
+        String refreshToken = request.get("refreshToken");
+        var token = authService.refreshToken(refreshToken);
+
+        var cookie = ResponseCookie.from("accessToken", token.getToken())
+                .httpOnly(true)
+                .secure(false)
+                .path("/").maxAge(1800).build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return token;
     }
 
     @PostMapping("/user/register")

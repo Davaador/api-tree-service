@@ -17,10 +17,12 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,6 +32,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @SoftDelete
 @Entity
+@Table(name = "user", indexes = {
+    @Index(name = "idx_user_phone_number", columnList = "phoneNumber"),
+    @Index(name = "idx_user_account_non_expired", columnList = "accountNonExpired"),
+    @Index(name = "idx_user_account_non_locked", columnList = "accountNonLocked"),
+    @Index(name = "idx_user_credentials_non_expired", columnList = "credentialsNonExpired"),
+    @Index(name = "idx_user_enabled", columnList = "enabled")
+})
 public class User implements UserDetails {
     @Setter(AccessLevel.NONE)
     @Id
