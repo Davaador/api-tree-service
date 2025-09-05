@@ -31,5 +31,6 @@ public class AdminCreateDto {
     private Boolean isDeceased;
     private Date deceasedDate;
     private Integer isParent;
+    private Integer spouseId;
 
 }

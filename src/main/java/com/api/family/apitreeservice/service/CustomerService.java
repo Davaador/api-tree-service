@@ -218,4 +218,20 @@ public class CustomerService {
         Customer customer = findById(id);
         customerRepository.delete(customer);
     }
+
+    public List<CustomerDto> getAvailableSpouses() {
+        List<Customer> customers = customerRepository.findAll();
+        if (CollectionUtils.isEmpty(customers))
+            return new ArrayList<>();
+        // Filter to include enabled users and customers without spouses
+        customers = customers.stream()
+                .filter(c -> c.getUser().isEnabled())
+                .filter(c -> c.getWife() == null && c.getHusband() == null) // Only customers without spouses
+                .toList();
+        return customers.stream().map(x -> modelMapper.map(x, CustomerDto.class)).toList();
+    }
+
+    public List<Customer> findAllCustomers() {
+        return customerRepository.findAll();
+    }
 }

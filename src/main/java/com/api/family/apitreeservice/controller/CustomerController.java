@@ -51,5 +51,9 @@ public class CustomerController {
         return customerService.findByActiveAllCustomers(customerFilter);
     }
 
+    @GetMapping("/couple/all")
+    public List<CustomerDto> getAvailableSpouses() {
+        return customerService.getAvailableSpouses();
+    }
 
 }

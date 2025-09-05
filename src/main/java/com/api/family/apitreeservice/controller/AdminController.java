@@ -54,4 +54,10 @@ public class AdminController {
         adminService.deleteCustomer(id);
     }
 
+    @GetMapping("/customers/{id}/available-spouses")
+    @ResponseStatus(HttpStatus.OK)
+    public List<CustomerSummaryDto> getAvailableSpousesForCustomer(@PathVariable Integer id) {
+        return adminService.getAvailableSpousesForCustomer(id);
+    }
+
 }
