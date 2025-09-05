@@ -1,7 +1,8 @@
 package com.api.family.apitreeservice.configuration;
 
 import com.api.family.apitreeservice.service.CustomerUserDetailService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,13 +25,17 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+@Slf4j
 @Configuration
-@AllArgsConstructor
+@RequiredArgsConstructor
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
-    private JwtFilter jwtFilter;
-    private CustomerUserDetailService userDetailService;
+
+    private final JwtFilter jwtFilter;
+    private final CustomerUserDetailService userDetailService;
+    private final SecurityProperties securityProperties;
+    private final RateLimitFilter rateLimitFilter;
 
     @Bean
     AuthenticationProvider authenticationProvider() {
@@ -50,7 +55,8 @@ public class SecurityConfig {
         return http.cors(cors -> cors.configurationSource(corsConfigurationSource())).authorizeHttpRequests(
                 requests -> requests.requestMatchers(HttpMethod.OPTIONS).permitAll()
                         .requestMatchers("/health/**", "/metrics", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/auth/token", "/auth/token", "/auth/user/register", "/auth/sent/otp",
+                        .requestMatchers("/api/auth/token", "/auth/token", "/auth/refresh", "/auth/user/register",
+                                "/auth/sent/otp",
                                 "/auth/check/otp",
                                 "/auth/reset/password")
                         .permitAll()
@@ -59,6 +65,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
@@ -71,11 +78,38 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         var configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*"));
-        configuration.setAllowedMethods(List.of("*"));
-        configuration.setAllowedHeaders(List.of("*"));
+
+        // Use configured origins or default to localhost for development
+        if (securityProperties.getCors().getAllowedOrigins() != null) {
+            configuration.setAllowedOrigins(securityProperties.getCors().getAllowedOrigins());
+        } else {
+            configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001"));
+        }
+
+        if (securityProperties.getCors().getAllowedMethods() != null) {
+            configuration.setAllowedMethods(securityProperties.getCors().getAllowedMethods());
+        } else {
+            configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        }
+
+        if (securityProperties.getCors().getAllowedHeaders() != null) {
+            configuration.setAllowedHeaders(securityProperties.getCors().getAllowedHeaders());
+        } else {
+            configuration.setAllowedHeaders(List.of("*"));
+        }
+
+        configuration.setAllowCredentials(securityProperties.getCors().isAllowCredentials());
+        configuration.setMaxAge(
+                securityProperties.getCors().getMaxAge() > 0 ? securityProperties.getCors().getMaxAge() : 3600L);
+
         var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
+
+        log.info("CORS configuration loaded: origins={}, methods={}, allowCredentials={}",
+                configuration.getAllowedOrigins(),
+                configuration.getAllowedMethods(),
+                configuration.getAllowCredentials());
+
         return source;
     }
 }

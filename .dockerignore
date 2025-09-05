@@ -1,0 +1,17 @@
+target/
+!target/*.jar
+*.log
+logs/
+.git/
+.gitignore
+README.md
+.env
+.env.local
+.env.development
+.env.production
+node_modules/
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

@@ -68,5 +68,11 @@ public class Errors {
                         "Тухайн майл бүртгэлтэй байна.");
         public static final CustomError ADMIN_DUPLICATE = new CustomError(HttpStatus.BAD_REQUEST, "API0021",
                         "Админаар бүртгүүлсэн байна.");
+        public static final CustomError RATE_LIMIT_EXCEEDED = new CustomError(HttpStatus.TOO_MANY_REQUESTS, "API0022",
+                        "Rate limit exceeded. Please try again later.");
+        public static final CustomError INVALID_TOKEN = new CustomError(HttpStatus.UNAUTHORIZED, "API0023",
+                        "Invalid or expired token.");
+        public static final CustomError TOKEN_EXPIRED = new CustomError(HttpStatus.UNAUTHORIZED, "API0024",
+                        "Token has expired. Please refresh your token.");
 
 }
