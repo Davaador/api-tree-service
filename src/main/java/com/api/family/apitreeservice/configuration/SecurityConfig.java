@@ -54,7 +54,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.cors(cors -> cors.configurationSource(corsConfigurationSource())).authorizeHttpRequests(
                 requests -> requests.requestMatchers(HttpMethod.OPTIONS).permitAll()
-                        .requestMatchers("/health/**", "/metrics", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/actuator/**", "/health/**", "/metrics", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/auth/token", "/auth/token", "/auth/refresh", "/auth/user/register",
                                 "/auth/sent/otp",
                                 "/auth/check/otp",
