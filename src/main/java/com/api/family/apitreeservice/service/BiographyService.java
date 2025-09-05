@@ -7,6 +7,7 @@ import com.api.family.apitreeservice.model.postgres.BiographyHistory;
 import com.api.family.apitreeservice.model.postgres.Customer;
 import com.api.family.apitreeservice.repository.BiographyHistoryRepository;
 import com.api.family.apitreeservice.repository.BiographyRepository;
+import com.api.family.apitreeservice.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,6 +31,7 @@ public class BiographyService {
     private final BiographyHistoryRepository biographyHistoryRepository;
     private final ModelMapper modelMapper;
     private final UtilService utilService;
+    private final CustomerRepository customerRepository;
 
     @Transactional
     public BiographyDto addBiography(BiographyDto biographyDto) {
@@ -143,6 +146,84 @@ public class BiographyService {
         BiographyHistoryDto dto = modelMapper.map(history, BiographyHistoryDto.class);
         dto.setBiographyId(history.getBiography().getId());
         return dto;
+    }
+
+    public Map<String, Object> getThreeGenerationsBiography() {
+        try {
+            // Get current user's customer
+            Customer currentCustomer = utilService.findByCustomer();
+            if (currentCustomer == null) {
+                throw new RuntimeException("Current customer not found");
+            }
+
+            Map<String, Object> result = new HashMap<>();
+
+            // Get current user's biography
+            Optional<Biography> currentBiography = biographyRepository.findByCustomer(currentCustomer);
+            if (currentBiography.isPresent()) {
+                result.put("self", modelMapper.map(currentBiography.get(), BiographyDto.class));
+            }
+
+            // Get father's biography
+            Customer father = currentCustomer.getParent();
+            if (father != null) {
+                Optional<Biography> fatherBiography = biographyRepository.findByCustomer(father);
+                if (fatherBiography.isPresent()) {
+                    result.put("father", modelMapper.map(fatherBiography.get(), BiographyDto.class));
+                }
+
+                // Get grandfather's biography (father's father)
+                Customer grandfather = father.getParent();
+                if (grandfather != null) {
+                    Optional<Biography> grandfatherBiography = biographyRepository.findByCustomer(grandfather);
+                    if (grandfatherBiography.isPresent()) {
+                        result.put("grandfather", modelMapper.map(grandfatherBiography.get(), BiographyDto.class));
+                    }
+                }
+            }
+
+            // Add generation info
+            result.put("generations", getGenerationInfo(currentCustomer));
+
+            log.info("Successfully retrieved three generations biography for customer: {}", currentCustomer.getId());
+            return result;
+
+        } catch (Exception e) {
+            log.error("Error getting three generations biography: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to get three generations biography", e);
+        }
+    }
+
+    private Map<String, Object> getGenerationInfo(Customer currentCustomer) {
+        Map<String, Object> generationInfo = new HashMap<>();
+
+        // Self info
+        generationInfo.put("self", Map.of(
+                "name", currentCustomer.getFirstName() + " " + currentCustomer.getLastName(),
+                "hasBiography", biographyRepository.findByCustomer(currentCustomer).isPresent()));
+
+        // Father info
+        Customer father = currentCustomer.getParent();
+        if (father != null) {
+            generationInfo.put("father", Map.of(
+                    "name", father.getFirstName() + " " + father.getLastName(),
+                    "hasBiography", biographyRepository.findByCustomer(father).isPresent()));
+
+            // Grandfather info
+            Customer grandfather = father.getParent();
+            if (grandfather != null) {
+                generationInfo.put("grandfather", Map.of(
+                        "name", grandfather.getFirstName() + " " + grandfather.getLastName(),
+                        "hasBiography", biographyRepository.findByCustomer(grandfather).isPresent()));
+            } else {
+                generationInfo.put("grandfather", null);
+            }
+        } else {
+            generationInfo.put("father", null);
+            generationInfo.put("grandfather", null);
+        }
+
+        return generationInfo;
     }
 
 }

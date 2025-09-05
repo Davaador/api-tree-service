@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/biography")
@@ -39,6 +40,17 @@ public class BiographyController {
             return ResponseEntity.ok(restoredBiography);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/three-generations")
+    public ResponseEntity<?> getThreeGenerationsBiography() {
+        try {
+            Map<String, Object> threeGenerationsBiography = biographyService.getThreeGenerationsBiography();
+            return ResponseEntity.ok(threeGenerationsBiography);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to get three generations biography"));
         }
     }
 
