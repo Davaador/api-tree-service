@@ -3,7 +3,6 @@ package com.api.family.apitreeservice.model.dto.customer;
 import java.util.Date;
 import java.util.List;
 
-import com.api.family.apitreeservice.model.postgres.Customer;
 import com.api.family.apitreeservice.model.postgres.Image;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -22,9 +21,9 @@ public class ParentDto {
     private Integer age;
     private String gender;
     private Date birthDate;
-    private Customer spouse;
-    private Customer husband;
-    private Customer wife;
+    // For frontend display - populated from IDs
+    private ParentDto wife;
+    private ParentDto husband;
     private List<ParentDto> children;
     private Image profileImage;
 }
