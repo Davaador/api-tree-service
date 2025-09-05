@@ -73,8 +73,31 @@ public class ParentService {
         List<Customer> customers = customerRepository.findByParent(null);
         Optional<Customer> parent = customers.stream().filter(c -> c.getUser().isEnabled()
                 && c.getIsParent() != null && c.getIsParent() == 0).findFirst();
-        if (parent.isPresent())
+        if (parent.isPresent()) {
             parentDto = modelMapper.map(parent.get(), ParentDto.class);
+            // Populate spouse data to avoid recursive references
+            Customer parentCustomer = parent.get();
+            if (parentCustomer.getWife() != null) {
+                // Create a simple spouse DTO without recursive references
+                ParentDto wifeDto = new ParentDto();
+                wifeDto.setId(parentCustomer.getWife().getId());
+                wifeDto.setFirstName(parentCustomer.getWife().getFirstName());
+                wifeDto.setLastName(parentCustomer.getWife().getLastName());
+                wifeDto.setGender(parentCustomer.getWife().getGender());
+                wifeDto.setBirthDate(parentCustomer.getWife().getBirthDate());
+                parentDto.setWife(wifeDto);
+            }
+            if (parentCustomer.getHusband() != null) {
+                // Create a simple spouse DTO without recursive references
+                ParentDto husbandDto = new ParentDto();
+                husbandDto.setId(parentCustomer.getHusband().getId());
+                husbandDto.setFirstName(parentCustomer.getHusband().getFirstName());
+                husbandDto.setLastName(parentCustomer.getHusband().getLastName());
+                husbandDto.setGender(parentCustomer.getHusband().getGender());
+                husbandDto.setBirthDate(parentCustomer.getHusband().getBirthDate());
+                parentDto.setHusband(husbandDto);
+            }
+        }
 
         return parentDto;
     }
@@ -82,14 +105,67 @@ public class ParentService {
     public ParentDto findParentsByParentId(List<Integer> id) {
         log.info("findParentsByParentId started for ID: {}", id);
         List<Customer> fatherCustomers = customerRepository.findByParentAndIsParent(null, 0);
+        if (fatherCustomers.isEmpty()) {
+            return null;
+        }
+
         ParentDto parentDto = modelMapper.map(fatherCustomers.getFirst(), ParentDto.class);
+
+        // Populate spouse data to avoid recursive references
+        Customer father = fatherCustomers.getFirst();
+        if (father.getWife() != null) {
+            // Create a simple spouse DTO without recursive references
+            ParentDto wifeDto = new ParentDto();
+            wifeDto.setId(father.getWife().getId());
+            wifeDto.setFirstName(father.getWife().getFirstName());
+            wifeDto.setLastName(father.getWife().getLastName());
+            wifeDto.setGender(father.getWife().getGender());
+            wifeDto.setBirthDate(father.getWife().getBirthDate());
+            parentDto.setWife(wifeDto);
+        }
+        if (father.getHusband() != null) {
+            // Create a simple spouse DTO without recursive references
+            ParentDto husbandDto = new ParentDto();
+            husbandDto.setId(father.getHusband().getId());
+            husbandDto.setFirstName(father.getHusband().getFirstName());
+            husbandDto.setLastName(father.getHusband().getLastName());
+            husbandDto.setGender(father.getHusband().getGender());
+            husbandDto.setBirthDate(father.getHusband().getBirthDate());
+            parentDto.setHusband(husbandDto);
+        }
+
         List<ParentDto> lastParentList;
         Map<Integer, List<ParentDto>> maps = new HashMap<>();
         for (Integer i : id) {
             Optional<Customer> firstCustomer = customerRepository.findById(i);
             if (firstCustomer.isPresent()) {
                 List<Customer> childList = customerRepository.findByParentAndIsParent(firstCustomer.get(), 0);
-                maps.put(i, childList.stream().map(x -> modelMapper.map(x, ParentDto.class)).toList());
+                List<ParentDto> childDtos = childList.stream().map(x -> {
+                    ParentDto dto = modelMapper.map(x, ParentDto.class);
+                    // Populate spouse data to avoid recursive references
+                    if (x.getWife() != null) {
+                        // Create a simple spouse DTO without recursive references
+                        ParentDto wifeDto = new ParentDto();
+                        wifeDto.setId(x.getWife().getId());
+                        wifeDto.setFirstName(x.getWife().getFirstName());
+                        wifeDto.setLastName(x.getWife().getLastName());
+                        wifeDto.setGender(x.getWife().getGender());
+                        wifeDto.setBirthDate(x.getWife().getBirthDate());
+                        dto.setWife(wifeDto);
+                    }
+                    if (x.getHusband() != null) {
+                        // Create a simple spouse DTO without recursive references
+                        ParentDto husbandDto = new ParentDto();
+                        husbandDto.setId(x.getHusband().getId());
+                        husbandDto.setFirstName(x.getHusband().getFirstName());
+                        husbandDto.setLastName(x.getHusband().getLastName());
+                        husbandDto.setGender(x.getHusband().getGender());
+                        husbandDto.setBirthDate(x.getHusband().getBirthDate());
+                        dto.setHusband(husbandDto);
+                    }
+                    return dto;
+                }).toList();
+                maps.put(i, childDtos);
             }
         }
 
@@ -109,9 +185,7 @@ public class ParentService {
                 if (fatherCustomers.getFirst().getId().equals(id.get(i))) {
                     parentDto.setChildren(lastParentList);
                 }
-
             }
-
         }
         return parentDto;
     }

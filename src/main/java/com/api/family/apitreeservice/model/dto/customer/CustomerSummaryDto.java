@@ -19,4 +19,6 @@ public class CustomerSummaryDto {
     private java.util.Date deceasedDate;
     private Integer isParent;
     private Integer lastNameId;
+    private Integer spouseId;
+    private String gender;
 }
