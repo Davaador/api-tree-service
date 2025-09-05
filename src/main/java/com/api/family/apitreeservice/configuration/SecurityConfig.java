@@ -1,5 +1,6 @@
 package com.api.family.apitreeservice.configuration;
 
+import com.api.family.apitreeservice.repository.UserRepository;
 import com.api.family.apitreeservice.service.CustomerUserDetailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,14 +34,14 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
-    private final CustomerUserDetailService userDetailService;
+    private final UserRepository userRepository;
     private final SecurityProperties securityProperties;
     private final RateLimitFilter rateLimitFilter;
 
     @Bean
     AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailService);
+        authenticationProvider.setUserDetailsService(new CustomerUserDetailService(userRepository));
         authenticationProvider.setPasswordEncoder(passwordEncoder());
         return authenticationProvider;
     }
@@ -54,7 +55,8 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.cors(cors -> cors.configurationSource(corsConfigurationSource())).authorizeHttpRequests(
                 requests -> requests.requestMatchers(HttpMethod.OPTIONS).permitAll()
-                        .requestMatchers("/actuator/**", "/health/**", "/metrics", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/actuator/**", "/health/**", "/metrics", "/swagger-ui/**", "/v3/api-docs/**")
+                        .permitAll()
                         .requestMatchers("/api/auth/token", "/auth/token", "/auth/refresh", "/auth/user/register",
                                 "/auth/sent/otp",
                                 "/auth/check/otp",
