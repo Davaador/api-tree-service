@@ -183,21 +183,25 @@ public class CustomerService {
     }
 
     public Page<CoupleDto> findByActiveAllCustomers(@Valid CustomerFilter filter) {
-        Specification<Customer> spec = Specification.where(null);
-        // if (StringUtils.isNotBlank(filter.getPhoneNumber())) {
-        // spec =
-        // spec.and(customerSpecs.customerContainsEnabled(filter.getPhoneNumber(), ""));
-        // }
-        // if(StringUtils.isNotBlank(filter.getLastName())) {
-        spec = spec.and(customerSpecs.customerContainsEnabled(filter.getPhoneNumber(), filter.getLastName(),
-                filter.getFirstName()));
-        // }
+        Specification<Customer> spec = customerSpecs.buildCustomerSpecification(
+                filter.getPhoneNumber(),
+                filter.getLastName(),
+                filter.getFirstName(),
+                filter.getEmail(),
+                filter.getRegister(),
+                filter.getGender(),
+                filter.getMinAge(),
+                filter.getMaxAge(),
+                filter.getBirthDateFrom(),
+                filter.getBirthDateTo(),
+                filter.getIsDeceased(),
+                filter.getIsParent());
+
         Sort.Direction direction = filter.getIsSortAscending() == 1 ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Sort sort = Sort.by(direction, "birthDate");
+        Sort sort = Sort.by(direction, filter.getSortField());
         Pageable pageable = PageRequest.of(filter.getPage(), filter.getSize(), sort);
         var list = customerRepository.findAll(spec, pageable);
         return list.map(x -> modelMapper.map(x, CoupleDto.class));
-
     }
 
     @Cacheable(value = "customers", key = "#id")
