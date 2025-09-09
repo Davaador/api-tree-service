@@ -27,4 +27,5 @@ public class ChildController {
     public List<ParentDto> getChildInfos() {
         return childService.getChildInfos();
     }
+
 }

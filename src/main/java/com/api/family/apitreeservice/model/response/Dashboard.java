@@ -11,4 +11,5 @@ public class Dashboard {
     private Integer total = 0;
     private Integer pendingCount = 0;
     private Integer activeCount = 0;
+    private Integer birthOrder = 0; // Which child they are (1st, 2nd, 3rd, etc.)
 }
