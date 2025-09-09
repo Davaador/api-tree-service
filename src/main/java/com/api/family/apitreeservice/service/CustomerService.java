@@ -3,6 +3,7 @@ package com.api.family.apitreeservice.service;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -23,11 +24,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
+import lombok.extern.slf4j.Slf4j;
 
 import com.api.family.apitreeservice.constants.Constants;
 import com.api.family.apitreeservice.exception.CustomException;
 import com.api.family.apitreeservice.exception.Errors;
 import com.api.family.apitreeservice.model.dto.admin.AdminCreateDto;
+import com.api.family.apitreeservice.model.dto.child.BirthOrderDto;
 import com.api.family.apitreeservice.model.dto.child.ChildDto;
 import com.api.family.apitreeservice.model.dto.customer.CoupleDto;
 import com.api.family.apitreeservice.model.dto.customer.CustomerCoupleDto;
@@ -48,6 +51,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CustomerService {
     private final CustomerRepository customerRepository;
     private final JwtTokenGenerate jwtTokenGenerate;
@@ -179,7 +183,37 @@ public class CustomerService {
 
         dashboard.setPendingCount((int) (customers.size() - active));
         dashboard.setActiveCount((int) active);
+
+        // Add birth order information
+        int birthOrderInfo = getCurrentUserBirthOrder(customers);
+        dashboard.setBirthOrder(birthOrderInfo);
         return dashboard;
+    }
+
+    public int getCurrentUserBirthOrder(List<Customer> allCustomers) {
+        log.info("Get current user birth order");
+        Customer currentCustomer = utilService.findByCustomer();
+        // Get all children of the parent
+        if (CollectionUtils.isEmpty(allCustomers)) {
+            return 0;
+        }
+
+        // Sort by birth date to determine birth order
+        List<Customer> sortedChildren = allCustomers.stream()
+                .sorted(Comparator.comparing(Customer::getBirthDate))
+                .toList();
+
+        // Find current user's position in the sorted list
+        int birthOrder = 0;
+        for (int i = 0; i < sortedChildren.size(); i++) {
+            if (sortedChildren.get(i).getId().equals(currentCustomer.getId())) {
+                birthOrder = i + 1; // 1st, 2nd, 3rd, etc.
+                break;
+            }
+        }
+
+        log.info("Current user birth order: {} out of {} children", birthOrder, sortedChildren.size());
+        return birthOrder;
     }
 
     public Page<CoupleDto> findByActiveAllCustomers(@Valid CustomerFilter filter) {

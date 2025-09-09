@@ -30,5 +30,7 @@ public class CoupleDto {
     private Customer husband;
     private Customer parent;
     private Image profileImage;
+    private Boolean isDeceased = false;
+    private Date deceasedDate;
 
 }
