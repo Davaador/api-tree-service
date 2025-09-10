@@ -6,11 +6,17 @@ import org.springframework.stereotype.Service;
 
 import com.api.family.apitreeservice.constants.RoleEnumString;
 import com.api.family.apitreeservice.model.dto.admin.AdminCreateDto;
+import com.api.family.apitreeservice.model.dto.biography.BiographyDto;
+import com.api.family.apitreeservice.model.dto.biography.BiographyHistoryDto;
 import com.api.family.apitreeservice.model.postgres.AdminCustomer;
+import com.api.family.apitreeservice.model.postgres.Biography;
+import com.api.family.apitreeservice.model.postgres.BiographyHistory;
 import com.api.family.apitreeservice.model.postgres.Customer;
 import com.api.family.apitreeservice.model.postgres.Role;
 import com.api.family.apitreeservice.model.postgres.User;
 import com.api.family.apitreeservice.repository.AdminCustomerRepository;
+import com.api.family.apitreeservice.repository.BiographyRepository;
+import com.api.family.apitreeservice.repository.BiographyHistoryRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +26,9 @@ import com.api.family.apitreeservice.model.dto.customer.CustomerSummaryDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import java.util.Optional;
+import java.util.Objects;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +42,8 @@ public class AdminService {
     private final ModelMapper modelMapper;
     private final AdminCustomerRepository adminCustomerRepository;
     private final CustomerService customerService;
+    private final BiographyRepository biographyRepository;
+    private final BiographyHistoryRepository biographyHistoryRepository;
 
     public AdminCreateDto createCustomer(@Valid AdminCreateDto adminCreateDto) {
         log.info("Creating admin customer");
@@ -334,6 +345,230 @@ public class AdminService {
             dto.setGender(c.getGender());
             return dto;
         }).collect(Collectors.toList());
+    }
+
+    public BiographyDto addBiographyForCustomer(Integer customerId, BiographyDto biographyDto) {
+        log.info("Adding biography for customer: {}", customerId);
+        utilService.checkAdmin();
+
+        Customer currentAdmin = utilService.findByCustomer();
+        Customer targetCustomer = userService.getByCustomer(customerId);
+
+        if (targetCustomer == null) {
+            throw new RuntimeException("Customer not found");
+        }
+
+        // Check if the customer belongs to the current admin
+        boolean belongsToAdmin = adminCustomerRepository.findCustomersByAdminId(currentAdmin.getId())
+                .stream()
+                .anyMatch(c -> c.getId().equals(customerId));
+
+        if (!belongsToAdmin) {
+            throw new RuntimeException("Customer not found or access denied");
+        }
+
+        // Check if biography already exists
+        Optional<Biography> existingBiography = biographyRepository.findByCustomer(targetCustomer);
+
+        Biography biography;
+        if (existingBiography.isEmpty()) {
+            // Create new biography
+            biography = new Biography(biographyDto);
+            biography.setCustomer(targetCustomer);
+            log.info("Creating new biography for customer: {}", customerId);
+        } else {
+            // Update existing biography
+            biography = existingBiography.get();
+            String oldContent = biography.getDetailBiography();
+            String newContent = biographyDto.getDetailBiography();
+
+            // Only update if content changed
+            if (!Objects.equals(oldContent, newContent)) {
+                // Save history before updating
+                saveBiographyHistory(biography, "Content updated");
+                biography.setDetailBiography(newContent);
+                biography.setUpdatedAt(LocalDateTime.now());
+                log.info("Biography content updated for customer: {}", customerId);
+            }
+        }
+
+        Biography savedBiography = biographyRepository.save(biography);
+
+        // Save history for new biography after it's saved (has ID)
+        if (existingBiography.isEmpty()) {
+            saveBiographyHistory(savedBiography, "Initial biography created");
+            log.info("Initial biography history saved for customer: {}", customerId);
+        }
+
+        BiographyDto dto = new BiographyDto();
+        dto.setId(savedBiography.getId());
+        dto.setDetailBiography(savedBiography.getDetailBiography());
+        dto.setCustomerId(savedBiography.getCustomer().getId().longValue());
+        dto.setCustomerFirstName(savedBiography.getCustomer().getFirstName());
+        dto.setCustomerLastName(savedBiography.getCustomer().getLastName());
+        dto.setCreatedAt(savedBiography.getCreatedAt());
+        dto.setUpdatedAt(savedBiography.getUpdatedAt());
+        return dto;
+    }
+
+    public BiographyDto getBiographyForCustomer(Integer customerId) {
+        log.info("Getting biography for customer: {}", customerId);
+        utilService.checkAdmin();
+
+        Customer currentAdmin = utilService.findByCustomer();
+        Customer targetCustomer = userService.getByCustomer(customerId);
+
+        if (targetCustomer == null) {
+            throw new RuntimeException("Customer not found");
+        }
+
+        // Check if the customer belongs to the current admin
+        boolean belongsToAdmin = adminCustomerRepository.findCustomersByAdminId(currentAdmin.getId())
+                .stream()
+                .anyMatch(c -> c.getId().equals(customerId));
+
+        if (!belongsToAdmin) {
+            throw new RuntimeException("Customer not found or access denied");
+        }
+
+        Optional<Biography> biography = biographyRepository.findByCustomer(targetCustomer);
+        if (biography.isEmpty()) {
+            return null;
+        }
+
+        Biography bio = biography.get();
+        BiographyDto dto = new BiographyDto();
+        dto.setId(bio.getId());
+        dto.setDetailBiography(bio.getDetailBiography());
+        dto.setCustomerId(bio.getCustomer().getId().longValue());
+        dto.setCustomerFirstName(bio.getCustomer().getFirstName());
+        dto.setCustomerLastName(bio.getCustomer().getLastName());
+        dto.setCreatedAt(bio.getCreatedAt());
+        dto.setUpdatedAt(bio.getUpdatedAt());
+        return dto;
+    }
+
+    public List<BiographyHistoryDto> getBiographyHistoryForCustomer(Integer customerId) {
+        log.info("Getting biography history for customer: {}", customerId);
+        utilService.checkAdmin();
+
+        Customer currentAdmin = utilService.findByCustomer();
+        Customer targetCustomer = userService.getByCustomer(customerId);
+
+        if (targetCustomer == null) {
+            throw new RuntimeException("Customer not found");
+        }
+
+        // Check if the customer belongs to the current admin
+        boolean belongsToAdmin = adminCustomerRepository.findCustomersByAdminId(currentAdmin.getId())
+                .stream()
+                .anyMatch(c -> c.getId().equals(customerId));
+
+        if (!belongsToAdmin) {
+            throw new RuntimeException("Customer not found or access denied");
+        }
+
+        Optional<Biography> biography = biographyRepository.findByCustomer(targetCustomer);
+        if (biography.isEmpty()) {
+            return List.of();
+        }
+
+        List<BiographyHistory> history = biographyHistoryRepository
+                .findByBiographyOrderByCreatedAtDesc(biography.get());
+        return history.stream()
+                .map(this::mapToHistoryDto)
+                .collect(Collectors.toList());
+    }
+
+    public BiographyDto restoreBiographyVersionForCustomer(Integer customerId, Long historyId) {
+        log.info("Restoring biography version {} for customer: {}", historyId, customerId);
+        utilService.checkAdmin();
+
+        Customer currentAdmin = utilService.findByCustomer();
+        Customer targetCustomer = userService.getByCustomer(customerId);
+
+        if (targetCustomer == null) {
+            throw new RuntimeException("Customer not found");
+        }
+
+        // Check if the customer belongs to the current admin
+        boolean belongsToAdmin = adminCustomerRepository.findCustomersByAdminId(currentAdmin.getId())
+                .stream()
+                .anyMatch(c -> c.getId().equals(customerId));
+
+        if (!belongsToAdmin) {
+            throw new RuntimeException("Customer not found or access denied");
+        }
+
+        Optional<Biography> biography = biographyRepository.findByCustomer(targetCustomer);
+        if (biography.isEmpty()) {
+            throw new RuntimeException("Biography not found");
+        }
+
+        Optional<BiographyHistory> historyEntry = biographyHistoryRepository.findById(historyId);
+        if (historyEntry.isEmpty()) {
+            throw new RuntimeException("History entry not found");
+        }
+
+        // Verify the history entry belongs to the customer's biography
+        if (!historyEntry.get().getBiography().getId().equals(biography.get().getId())) {
+            throw new RuntimeException("History entry does not belong to this customer's biography");
+        }
+
+        // Restore the biography content
+        Biography bio = biography.get();
+        bio.setDetailBiography(historyEntry.get().getBiographyContent());
+        bio.setUpdatedAt(LocalDateTime.now());
+
+        Biography savedBiography = biographyRepository.save(bio);
+
+        // Create new history entry for the restore action
+        BiographyHistory restoreHistory = new BiographyHistory();
+        restoreHistory.setBiography(savedBiography);
+        restoreHistory.setBiographyContent(savedBiography.getDetailBiography());
+        restoreHistory.setChangeDescription("Restored from version " + historyEntry.get().getVersionNumber());
+        restoreHistory.setVersionNumber(historyEntry.get().getVersionNumber() + 1);
+        restoreHistory.setCreatedAt(LocalDateTime.now());
+        biographyHistoryRepository.save(restoreHistory);
+
+        BiographyDto dto = new BiographyDto();
+        dto.setId(savedBiography.getId());
+        dto.setDetailBiography(savedBiography.getDetailBiography());
+        dto.setCustomerId(savedBiography.getCustomer().getId().longValue());
+        dto.setCustomerFirstName(savedBiography.getCustomer().getFirstName());
+        dto.setCustomerLastName(savedBiography.getCustomer().getLastName());
+        dto.setCreatedAt(savedBiography.getCreatedAt());
+        dto.setUpdatedAt(savedBiography.getUpdatedAt());
+        return dto;
+    }
+
+    private BiographyHistoryDto mapToHistoryDto(BiographyHistory history) {
+        BiographyHistoryDto dto = new BiographyHistoryDto();
+        dto.setId(history.getId());
+        dto.setBiographyContent(history.getBiographyContent());
+        dto.setVersionNumber(history.getVersionNumber());
+        dto.setChangeDescription(history.getChangeDescription());
+        dto.setCreatedAt(history.getCreatedAt());
+        dto.setBiographyId(history.getBiography().getId());
+        return dto;
+    }
+
+    private void saveBiographyHistory(Biography biography, String changeDescription) {
+        if (biography == null || biography.getId() == null) {
+            log.warn("Cannot save biography history: biography or biography ID is null");
+            return;
+        }
+
+        try {
+            Long versionCount = biographyHistoryRepository.countByBiography(biography);
+            BiographyHistory history = new BiographyHistory(biography, changeDescription);
+            history.setVersionNumber(versionCount.intValue() + 1);
+            biographyHistoryRepository.save(history);
+            log.info("Biography history saved for biography ID: {}, version: {}",
+                    biography.getId(), history.getVersionNumber());
+        } catch (Exception e) {
+            log.error("Error saving biography history for biography ID: {}", biography.getId(), e);
+        }
     }
 
 }
