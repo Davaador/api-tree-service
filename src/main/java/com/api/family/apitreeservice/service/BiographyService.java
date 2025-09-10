@@ -1,19 +1,5 @@
 package com.api.family.apitreeservice.service;
 
-import com.api.family.apitreeservice.model.dto.biography.BiographyDto;
-import com.api.family.apitreeservice.model.dto.biography.BiographyHistoryDto;
-import com.api.family.apitreeservice.model.postgres.Biography;
-import com.api.family.apitreeservice.model.postgres.BiographyHistory;
-import com.api.family.apitreeservice.model.postgres.Customer;
-import com.api.family.apitreeservice.repository.BiographyHistoryRepository;
-import com.api.family.apitreeservice.repository.BiographyRepository;
-import com.api.family.apitreeservice.repository.CustomerRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +7,21 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.api.family.apitreeservice.model.dto.biography.BiographyDto;
+import com.api.family.apitreeservice.model.dto.biography.BiographyHistoryDto;
+import com.api.family.apitreeservice.model.postgres.Biography;
+import com.api.family.apitreeservice.model.postgres.BiographyHistory;
+import com.api.family.apitreeservice.model.postgres.Customer;
+import com.api.family.apitreeservice.repository.BiographyHistoryRepository;
+import com.api.family.apitreeservice.repository.BiographyRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +32,6 @@ public class BiographyService {
     private final BiographyHistoryRepository biographyHistoryRepository;
     private final ModelMapper modelMapper;
     private final UtilService utilService;
-    private final CustomerRepository customerRepository;
 
     @Transactional
     public BiographyDto addBiography(BiographyDto biographyDto) {
