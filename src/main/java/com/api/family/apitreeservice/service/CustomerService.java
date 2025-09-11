@@ -14,9 +14,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.Timer;
-import io.micrometer.core.annotation.Timed;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,13 +21,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
-import lombok.extern.slf4j.Slf4j;
 
 import com.api.family.apitreeservice.constants.Constants;
 import com.api.family.apitreeservice.exception.CustomException;
 import com.api.family.apitreeservice.exception.Errors;
 import com.api.family.apitreeservice.model.dto.admin.AdminCreateDto;
-import com.api.family.apitreeservice.model.dto.child.BirthOrderDto;
 import com.api.family.apitreeservice.model.dto.child.ChildDto;
 import com.api.family.apitreeservice.model.dto.customer.CoupleDto;
 import com.api.family.apitreeservice.model.dto.customer.CustomerCoupleDto;
@@ -45,9 +40,12 @@ import com.api.family.apitreeservice.repository.CustomerRepository;
 import com.api.family.apitreeservice.spec.CustomerSpecs;
 import com.api.family.apitreeservice.validator.JwtTokenGenerate;
 
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.Counter;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -61,10 +59,7 @@ public class CustomerService {
     private final CloudinaryService cloudinaryService;
 
     // Metrics
-    private final Counter customerCreatedCounter;
     private final Counter customerUpdatedCounter;
-    private final Counter customerDeletedCounter;
-    private final Timer customerServiceTimer;
 
     public Customer createAdminCustomer(AdminCreateDto adminCreateDto, User user, Customer parentCustomer) {
         Customer customer = new Customer(adminCreateDto, user);
@@ -250,6 +245,12 @@ public class CustomerService {
     public Customer updateCustomer(Customer customer) {
         customerUpdatedCounter.increment();
         return customerRepository.save(customer);
+    }
+
+    public Customer findByUser(User user) {
+        return customerRepository.findByUser(
+                user)
+                .orElseThrow(() -> new CustomException(Errors.NOT_PENDING_USERS));
     }
 
     public void deleteCustomer(Integer id) {

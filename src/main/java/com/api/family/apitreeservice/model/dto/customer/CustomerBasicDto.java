@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 @Data
 @RequiredArgsConstructor
-public class CoupleDto {
+public class CustomerBasicDto {
     private Integer id;
     private String firstName;
     private String lastName;
@@ -25,11 +25,8 @@ public class CoupleDto {
     private boolean editCustomer = false;
     private LocalDateTime modifiedDate = LocalDateTime.now();
     private UserDto user;
-    private CustomerBasicDto wife;
-    private CustomerBasicDto husband;
-    private CustomerBasicDto parent;
     private Image profileImage;
     private Boolean isDeceased = false;
     private Date deceasedDate;
-
+    private Integer isParent;
 }

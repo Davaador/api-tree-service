@@ -101,7 +101,7 @@ public class Customer {
         this.register = userDto.getRegister();
         this.surName = userDto.getSurName();
         this.birthDate = Functions.getBirthday(userDto.getRegister());
-        this.age = userDto.getAge();
+        this.age = userDto.getAge() != null ? userDto.getAge() : Functions.getAge(userDto.getRegister());
         this.phoneNumber = userDto.getPhoneNumber();
         this.user = user;
         this.gender = Integer.parseInt(String.valueOf(userDto.getRegister()

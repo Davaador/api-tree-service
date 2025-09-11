@@ -1,21 +1,22 @@
 package com.api.family.apitreeservice.service;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
 import com.api.family.apitreeservice.model.dto.auth.Credentials;
 import com.api.family.apitreeservice.model.dto.customer.CoupleDto;
 import com.api.family.apitreeservice.model.postgres.Customer;
 import com.api.family.apitreeservice.model.postgres.User;
 import com.api.family.apitreeservice.model.response.Token;
 import com.api.family.apitreeservice.repository.UserRepository;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.Timer;
+
 import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.Counter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +31,6 @@ public class AuthService {
     // Metrics
     private final Counter authenticationSuccessCounter;
     private final Counter authenticationFailureCounter;
-    private final Timer authServiceTimer;
 
     @Timed("auth.service.authenticate")
     public Token authenticate(@Valid Credentials credentials) {
