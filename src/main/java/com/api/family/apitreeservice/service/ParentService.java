@@ -8,6 +8,8 @@ import com.api.family.apitreeservice.model.dto.customer.ParentDto;
 import com.api.family.apitreeservice.model.dto.user.AddParentDto;
 import com.api.family.apitreeservice.model.postgres.Customer;
 import com.api.family.apitreeservice.repository.CustomerRepository;
+import com.api.family.apitreeservice.validator.Functions;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -55,7 +57,9 @@ public class ParentService {
 
         customer.setSurName(addParentDto.getSurName());
         customer.setBirthDate(addParentDto.getBirthDate());
-        customer.setAge(addParentDto.getAge());
+        customer.setAge(addParentDto.getAge() != null ? addParentDto.getAge()
+                : Functions.calculateAgeFromBirthDate(
+                        addParentDto.getBirthDate()));
         if (StringUtils.isNotEmpty(addParentDto.getEmail())
                 && !addParentDto.getEmail().equalsIgnoreCase(customer.getEmail())) {
             utilService.checkIfCustomerInEmail(addParentDto.getEmail(), Boolean.FALSE, Errors.NOT_CUSTOMER_EMAIL);

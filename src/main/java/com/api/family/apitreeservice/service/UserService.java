@@ -19,9 +19,11 @@ import com.api.family.apitreeservice.exception.Errors;
 import com.api.family.apitreeservice.model.dto.Pagination;
 import com.api.family.apitreeservice.model.dto.admin.AdminCreateDto;
 import com.api.family.apitreeservice.model.dto.user.UserDto;
+import com.api.family.apitreeservice.model.postgres.AdminCustomer;
 import com.api.family.apitreeservice.model.postgres.Customer;
 import com.api.family.apitreeservice.model.postgres.RoleUsers;
 import com.api.family.apitreeservice.model.postgres.User;
+import com.api.family.apitreeservice.repository.AdminCustomerRepository;
 import com.api.family.apitreeservice.repository.RoleUsersRepository;
 import com.api.family.apitreeservice.repository.UserRepository;
 import com.api.family.apitreeservice.spec.UserSpecs;
@@ -42,6 +44,7 @@ public class UserService {
     private final UtilService utilService;
     private final CustomerService customerService;
     private final RoleUsersRepository roleUsersRepository;
+    private final AdminCustomerRepository adminCustomerRepository;
 
     public UserDto create(@Valid UserDto userDto) {
         this.checkIfDuplicate(userDto.getPhoneNumber(), userDto.getRegister());
@@ -102,6 +105,12 @@ public class UserService {
     public void putActiveUser(@NotNull Long id) {
         utilService.checkAdmin();
         var updateUser = this.getById(id);
+        Customer userCustomer = utilService.findByCustomer();
+        Customer customer = customerService.findByUser(updateUser);
+        AdminCustomer adminCustomer = new AdminCustomer();
+        adminCustomer.setAdmin_id(userCustomer.getId());
+        adminCustomer.setNewCustomer(customer);
+        adminCustomerRepository.save(adminCustomer);
         updateUser.setEnabled(Boolean.TRUE);
         userRepository.save(updateUser);
     }

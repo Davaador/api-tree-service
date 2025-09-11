@@ -1,13 +1,14 @@
 package com.api.family.apitreeservice.validator;
 
-import com.api.family.apitreeservice.annotation.ValidPassword;
-import io.jsonwebtoken.security.Password;
-import jakarta.validation.ConstraintValidator;
-import jakarta.validation.ConstraintValidatorContext;
+import java.util.regex.Pattern;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.regex.Pattern;
+import com.api.family.apitreeservice.annotation.ValidPassword;
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 @Component
 public class PasswordValidator implements ConstraintValidator<ValidPassword, String> {
@@ -16,6 +17,7 @@ public class PasswordValidator implements ConstraintValidator<ValidPassword, Str
 
     @Value("${tinker.validation.password:22}")
     private String passwordPattern;
+
     @Override
     public void initialize(ValidPassword constraintAnnotation) {
         pattern = Pattern.compile(passwordPattern);

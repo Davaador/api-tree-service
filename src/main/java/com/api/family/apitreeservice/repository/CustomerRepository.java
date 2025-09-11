@@ -2,7 +2,7 @@ package com.api.family.apitreeservice.repository;
 
 import com.api.family.apitreeservice.model.postgres.Customer;
 import com.api.family.apitreeservice.model.postgres.User;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
@@ -28,7 +28,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, JpaSp
 
     Optional<Customer> findById(int id);
 
-    @NotNull
+    @NonNull
     List<Customer> findAll();
 
     Optional<Customer> findByEmail(String email);

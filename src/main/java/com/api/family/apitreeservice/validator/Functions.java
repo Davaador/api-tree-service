@@ -7,6 +7,9 @@ import com.api.family.apitreeservice.exception.Errors;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -85,6 +88,46 @@ public class Functions {
     public static void matchPasswords(String password, String matchingPassword) {
         if (!matchingPassword.equals(password))
             throw new CustomException(Errors.NOT_MATCH_PASSWORD);
+    }
+
+    /**
+     * Төрсөн өдрөөр нь насыг бодож олно
+     * 
+     * @param birthDate төрсөн өдөр (Date)
+     * @return нас (int)
+     */
+    public static int calculateAgeFromBirthDate(@NotNull Date birthDate) {
+        LocalDate birthLocalDate = birthDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+        LocalDate currentDate = LocalDate.now();
+        return Period.between(birthLocalDate, currentDate).getYears();
+    }
+
+    /**
+     * Төрсөн өдрөөр нь насыг бодож олно
+     * 
+     * @param birthDate төрсөн өдөр (LocalDate)
+     * @return нас (int)
+     */
+    public static int calculateAgeFromBirthDate(@NotNull LocalDate birthDate) {
+        LocalDate currentDate = LocalDate.now();
+        return Period.between(birthDate, currentDate).getYears();
+    }
+
+    /**
+     * Төрсөн өдрөөр нь насыг бодож олно (String format)
+     * 
+     * @param birthDateString төрсөн өдөр (String format: "yyyy-MM-dd")
+     * @return нас (int)
+     */
+    public static int calculateAgeFromBirthDate(@NotNull String birthDateString) {
+        try {
+            LocalDate birthDate = LocalDate.parse(birthDateString);
+            return calculateAgeFromBirthDate(birthDate);
+        } catch (Exception e) {
+            throw new CustomException(Errors.INVALID_DATE_FORMAT);
+        }
     }
 
 }

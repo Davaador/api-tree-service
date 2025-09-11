@@ -74,5 +74,7 @@ public class Errors {
                         "Invalid or expired token.");
         public static final CustomError TOKEN_EXPIRED = new CustomError(HttpStatus.UNAUTHORIZED, "API0024",
                         "Token has expired. Please refresh your token.");
+        public static final CustomError INVALID_DATE_FORMAT = new CustomError(HttpStatus.BAD_REQUEST, "API0025",
+                        "Invalid date format. Please use yyyy-MM-dd format.");
 
 }
